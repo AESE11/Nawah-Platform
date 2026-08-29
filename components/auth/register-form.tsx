@@ -1,0 +1,96 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { Locale } from "@/lib/locale";
+
+export function RegisterForm({
+  locale,
+  dictionary,
+}: {
+  locale: Locale;
+  dictionary: {
+    auth: Record<string, string>;
+    forms: Record<string, string>;
+  };
+}) {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const response = await fetch(`/${locale}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => ({ message: "Registration failed." }))) as {
+        message?: string;
+      };
+      setError(payload.message ?? "Registration failed.");
+      return;
+    }
+
+    router.push(`/${locale}/login`);
+    router.refresh();
+  }
+
+  return (
+    <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 className="text-2xl font-bold text-slate-900">{dictionary.auth.registerTitle}</h1>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">{dictionary.auth.fullName}</Label>
+          <Input
+            id="name"
+            type="text"
+            placeholder={dictionary.forms.namePlaceholder}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">{dictionary.auth.email}</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder={dictionary.forms.emailPlaceholder}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">{dictionary.auth.password}</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder={dictionary.forms.passwordPlaceholder}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </div>
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? dictionary.auth.submit : dictionary.auth.registerButton}
+        </Button>
+      </form>
+    </div>
+  );
+}

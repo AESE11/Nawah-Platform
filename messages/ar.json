@@ -1,0 +1,109 @@
+{
+  "common": {
+    "home": "الرئيسية",
+    "courses": "الدورات",
+    "dashboard": "لوحة التحكم",
+    "contact": "تواصل معنا",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "language": "اللغة",
+    "search": "بحث",
+    "admin": "الإدارة"
+  },
+  "home": {
+    "title": "منصة تعليمية عربية حديثة",
+    "subtitle": "تعلم باحترافية مع محتوى عربي وإنجليزي متكامل.",
+    "ctaPrimary": "استكشف الدورات",
+    "ctaSecondary": "ابدأ الآن"
+  },
+  "auth": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "fullName": "الاسم الكامل",
+    "loginTitle": "مرحباً بعودتك",
+    "registerTitle": "إنشاء حساب جديد",
+    "loginButton": "تسجيل الدخول",
+    "registerButton": "إنشاء الحساب",
+    "submit": "إرسال"
+  },
+  "layout": {
+    "brand": "منصة التعليم",
+    "studentPanel": "لوحة الطالب",
+    "adminPanel": "لوحة الإدارة"
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "courses": "الدورات",
+    "contact": "تواصل معنا",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب"
+  },
+  "forms": {
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "********",
+    "namePlaceholder": "أدخل اسمك الكامل",
+    "search": "البحث عن الدورات",
+    "titleAr": "العنوان بالعربية",
+    "titleEn": "العنوان بالإنجليزية",
+    "slug": "الرابط",
+    "descriptionAr": "الوصف بالعربية",
+    "descriptionEn": "الوصف بالإنجليزية",
+    "shortDescriptionAr": "الوصف المختصر بالعربية",
+    "shortDescriptionEn": "الوصف المختصر بالإنجليزية",
+    "category": "الفئة",
+    "price": "السعر",
+    "status": "الحالة",
+    "featured": "مميز",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "publish": "نشر",
+    "draft": "مسودة",
+    "archived": "أرشيف"
+  },
+  "courses": {
+    "title": "الدورات",
+    "manage": "إدارة الدورات",
+    "createNew": "إنشاء دورة",
+    "published": "منشور",
+    "draft": "مسودة",
+    "archived": "أرشيف",
+    "featured": "مميز",
+    "chapters": "الفصول",
+    "lessons": "الدروس",
+    "details": "تفاصيل الدورة",
+    "noCourses": "لا توجد دورات.",
+    "filterByCategory": "تصفية حسب الفئة",
+    "allCategories": "كل الفئات"
+  },
+  "categories": {
+    "title": "الفئات",
+    "createNew": "إنشاء فئة",
+    "manage": "إدارة الفئات",
+    "noCategories": "لا توجد فئات."
+  },
+  "admin": {
+    "courses": "الدورات",
+    "categories": "الفئات",
+    "chapters": "الفصول",
+    "lessons": "الدروس",
+    "newCourse": "دورة جديدة",
+    "newCategory": "فئة جديدة",
+    "backToCourses": "العودة إلى الدورات"
+  },
+  "video": {
+    "loading": "جارٍ تحميل الفيديو...",
+    "accessDenied": "ليس لديك صلاحية لمشاهدة هذا الدرس.",
+    "loginRequired": "يرجى تسجيل الدخول للوصول إلى هذا الدرس.",
+    "unavailable": "الفيديو غير متاح حاليًا.",
+    "error": "تعذر تشغيل الفيديو.",
+    "lesson": "الدرس",
+    "chapter": "الفصل",
+    "course": "الدورة",
+    "nextLesson": "الدرس التالي",
+    "previousLesson": "الدرس السابق"
+  }
+}

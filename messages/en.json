@@ -1,0 +1,109 @@
+{
+  "common": {
+    "home": "Home",
+    "courses": "Courses",
+    "dashboard": "Dashboard",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "language": "Language",
+    "search": "Search",
+    "admin": "Admin"
+  },
+  "home": {
+    "title": "Modern Arabic Learning Platform",
+    "subtitle": "Learn with a professional bilingual Arabic and English learning experience.",
+    "ctaPrimary": "Explore Courses",
+    "ctaSecondary": "Get Started"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "loginTitle": "Welcome back",
+    "registerTitle": "Create a new account",
+    "loginButton": "Login",
+    "registerButton": "Create account",
+    "submit": "Submit"
+  },
+  "layout": {
+    "brand": "Education Platform",
+    "studentPanel": "Student Panel",
+    "adminPanel": "Admin Panel"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "courses": "Courses",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register"
+  },
+  "forms": {
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "********",
+    "namePlaceholder": "Enter your full name",
+    "search": "Search courses",
+    "titleAr": "Arabic title",
+    "titleEn": "English title",
+    "slug": "Slug",
+    "descriptionAr": "Arabic description",
+    "descriptionEn": "English description",
+    "shortDescriptionAr": "Arabic short description",
+    "shortDescriptionEn": "English short description",
+    "category": "Category",
+    "price": "Price",
+    "status": "Status",
+    "featured": "Featured",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "update": "Update",
+    "publish": "Publish",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "courses": {
+    "title": "Courses",
+    "manage": "Course management",
+    "createNew": "Create a course",
+    "published": "Published",
+    "draft": "Draft",
+    "archived": "Archived",
+    "featured": "Featured",
+    "chapters": "Chapters",
+    "lessons": "Lessons",
+    "details": "Course details",
+    "noCourses": "No courses found.",
+    "filterByCategory": "Filter by category",
+    "allCategories": "All categories"
+  },
+  "categories": {
+    "title": "Categories",
+    "createNew": "Create a category",
+    "manage": "Category management",
+    "noCategories": "No categories found."
+  },
+  "admin": {
+    "courses": "Courses",
+    "categories": "Categories",
+    "chapters": "Chapters",
+    "lessons": "Lessons",
+    "newCourse": "New course",
+    "newCategory": "New category",
+    "backToCourses": "Back to courses"
+  },
+  "video": {
+    "loading": "Loading video...",
+    "accessDenied": "You do not have access to this lesson.",
+    "loginRequired": "Please log in to access this lesson.",
+    "unavailable": "This lesson is not available for playback.",
+    "error": "The video could not be loaded.",
+    "lesson": "Lesson",
+    "chapter": "Chapter",
+    "course": "Course",
+    "nextLesson": "Next lesson",
+    "previousLesson": "Previous lesson"
+  }
+}
