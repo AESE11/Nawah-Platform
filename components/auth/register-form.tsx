@@ -25,29 +25,32 @@ export function RegisterForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+  event.preventDefault();
+  setError("");
+  setIsSubmitting(true);
 
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
+  const response = await fetch(`/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
 
-    setIsSubmitting(false);
+  setIsSubmitting(false);
 
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => ({ message: "Registration failed." }))) as {
-        message?: string;
-      };
-      setError(payload.message ?? "Registration failed.");
-      return;
-    }
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => ({
+      message: "Registration failed.",
+    }))) as {
+      message?: string;
+    };
 
-    router.push(`/${locale}/login`);
-    router.refresh();
+    setError(payload.message ?? "Registration failed.");
+    return;
   }
+
+  router.push(`/${locale}/login`);
+  router.refresh();
+}
 
   return (
     <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
