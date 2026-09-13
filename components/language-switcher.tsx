@@ -20,12 +20,12 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-1">
+    <div className="flex flex-wrap items-center gap-1.5 rounded-full border border-slate-200 bg-white p-1">
       {locales.map((locale) => (
         <Link
           key={locale}
           href={switchLocale(locale)}
-          className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+          className={`rounded-full px-2.5 py-1.5 text-[11px] font-medium transition sm:px-3 sm:text-xs ${
             pathname.startsWith(`/${locale}`)
               ? "bg-slate-900 text-white"
               : "text-slate-700 hover:bg-slate-100"

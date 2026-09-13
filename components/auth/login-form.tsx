@@ -47,7 +47,7 @@ export function LoginForm({
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 md:p-8">
       <h1 className="text-2xl font-bold text-slate-900">{dictionary.auth.loginTitle}</h1>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div className="space-y-2">
@@ -59,6 +59,7 @@ export function LoginForm({
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            className="min-w-0"
           />
         </div>
         <div className="space-y-2">
@@ -70,10 +71,11 @@ export function LoginForm({
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            className="min-w-0"
           />
         </div>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" className="w-full min-h-11" disabled={isSubmitting}>
           {isSubmitting ? dictionary.auth.submit : dictionary.auth.loginButton}
         </Button>
       </form>

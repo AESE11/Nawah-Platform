@@ -44,14 +44,16 @@ export default async function LocaleLayout({
   const dictionary = await getDictionary(locale);
 
   return (
-    <html lang={locale} dir={direction} suppressHydrationWarning>
-      <body className={`${inter.variable} ${tajawal.variable} min-h-screen bg-slate-50 text-slate-900 antialiased`}>
-        <div className="min-h-screen">
-          <SiteHeader locale={locale as Locale} dictionary={dictionary} />
-          <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
-          <SiteFooter locale={locale as Locale} dictionary={dictionary} />
-        </div>
-      </body>
-    </html>
+    <div
+      lang={locale}
+      dir={direction}
+      className={`${inter.variable} ${tajawal.variable} min-h-screen bg-slate-50 text-slate-900 antialiased`}
+    >
+      <div className="min-h-screen">
+        <SiteHeader locale={locale as Locale} dictionary={dictionary} />
+        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <SiteFooter locale={locale as Locale} dictionary={dictionary} />
+      </div>
+    </div>
   );
 }
