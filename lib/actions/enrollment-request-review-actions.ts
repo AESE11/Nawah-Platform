@@ -65,12 +65,42 @@ export async function approveEnrollmentRequestAction(
 
       const request = await tx.enrollmentRequest.findUnique({
         where: { id: parsed.data.requestId },
-        select: { userId: true, courseId: true },
+        select: {
+          userId: true,
+          courseId: true,
+          paymentId: true,
+        },
       });
 
       if (!request) {
         throw new Error("REQUEST_NOT_FOUND");
       }
+      if (!request.paymentId) {
+        throw new Error("PAYMENT_NOT_FOUND");
+      }
+
+     const payment = await tx.payment.findUnique({
+      where: { id: request.paymentId },
+      select: { id: true, status: true },
+    });
+
+     if (!payment) {
+        throw new Error("PAYMENT_NOT_FOUND");
+     }
+
+     if (payment.status !== "PENDING") {
+       throw new Error("PAYMENT_ALREADY_PROCESSED");
+    }
+
+     await tx.payment.update({
+       where: { id: payment.id },
+       data: {
+         status: "APPROVED",
+         adminNotes: parsed.data.adminNotes || null,
+         reviewedBy: admin.id,
+         reviewedAt: new Date(),
+        },
+      });
 
       const [user, course] = await Promise.all([
         tx.user.findUnique({ where: { id: request.userId }, select: { id: true } }),
@@ -108,14 +138,31 @@ export async function approveEnrollmentRequestAction(
       ? message(arabic, "تمت معالجة هذا الطلب مسبقًا.", "This request has already been processed.")
       : errorCode === "REQUEST_NOT_FOUND"
         ? message(arabic, "الطلب غير موجود.", "Request not found.")
-        : errorCode === "TARGET_NOT_VALID"
-          ? message(arabic, "المستخدم أو الدورة غير صالحين للتسجيل.", "The user or course is no longer valid for enrollment.")
-          : message(arabic, "تعذر الموافقة على الطلب.", "Could not approve the request.");
+        : errorCode === "PAYMENT_NOT_FOUND"
+          ? message(
+              arabic,
+              "لا يوجد دفع مرتبط بهذا الطلب.",
+              "No payment is linked to this request.",
+            )
+          : errorCode === "PAYMENT_ALREADY_PROCESSED"
+            ? message(
+                arabic,
+                "تمت معالجة الدفع المرتبط بهذا الطلب بالفعل.",
+                "The payment linked to this request has already been processed.",
+              )
+            : errorCode === "TARGET_NOT_VALID"
+              ? message(arabic, "المستخدم أو الدورة غير صالحين للتسجيل.", "The user or course is no longer valid for enrollment.")
+              : message(arabic, "تعذر الموافقة على الطلب.", "Could not approve the request.");
 
     return { status: "error", message: errorMessage };
   }
 
-  revalidatePath(`/${normalizeText(formData.get("locale"))}/admin/enrollment-requests`);
+  const locale = normalizeText(formData.get("locale"));
+
+revalidatePath(`/${locale}/admin/enrollment-requests`);
+revalidatePath(`/${locale}/admin/payments`);
+revalidatePath(`/${locale}/admin`);
+revalidatePath(`/${locale}/dashboard`);
   return { status: "success", message: message(arabic, "تمت الموافقة وتفعيل الاشتراك.", "Request approved and enrollment activated.") };
 }
 
@@ -143,20 +190,105 @@ export async function rejectEnrollmentRequestAction(
     return { status: "error", message: message(arabic, "يرجى إدخال سبب الرفض.", "A rejection reason is required.") };
   }
 
-  const result = await prisma.enrollmentRequest.updateMany({
-    where: { id: parsed.data.requestId, status: "PENDING" },
-    data: {
-      status: "REJECTED",
-      reviewedAt: new Date(),
-      reviewedBy: admin.id,
-      adminNotes: parsed.data.adminNotes || null,
-    },
+  try {
+  await prisma.$transaction(async (tx) => {
+    const claimed = await tx.enrollmentRequest.updateMany({
+      where: { id: parsed.data.requestId, status: "PENDING" },
+      data: {
+        status: "REJECTED",
+        reviewedAt: new Date(),
+        reviewedBy: admin.id,
+        adminNotes: parsed.data.adminNotes || null,
+      },
+    });
+
+    if (claimed.count !== 1) {
+      throw new Error("REQUEST_ALREADY_PROCESSED");
+    }
+
+    const request = await tx.enrollmentRequest.findUnique({
+      where: { id: parsed.data.requestId },
+      select: {
+        paymentId: true,
+      },
+    });
+
+    if (!request) {
+      throw new Error("REQUEST_NOT_FOUND");
+    }
+
+    if (!request.paymentId) {
+      throw new Error("PAYMENT_NOT_FOUND");
+    }
+
+    const payment = await tx.payment.findUnique({
+      where: { id: request.paymentId },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
+
+    if (!payment) {
+      throw new Error("PAYMENT_NOT_FOUND");
+    }
+
+    if (payment.status !== "PENDING") {
+      throw new Error("PAYMENT_ALREADY_PROCESSED");
+    }
+
+    await tx.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: "REJECTED",
+        adminNotes: parsed.data.adminNotes,
+        reviewedBy: admin.id,
+        reviewedAt: new Date(),
+      },
+    });
   });
+} catch (error) {
+  const errorCode = error instanceof Error ? error.message : "UNKNOWN";
 
-  if (result.count !== 1) {
-    return { status: "error", message: message(arabic, "تمت معالجة هذا الطلب مسبقًا أو أنه غير موجود.", "This request has already been processed or does not exist.") };
-  }
+  const errorMessage =
+    errorCode === "REQUEST_ALREADY_PROCESSED"
+      ? message(
+          arabic,
+          "طھظ…طھ ظ…ط¹ط§ظ„ط¬ط© ظ‡ط°ط§ ط§ظ„ط·ظ„ط¨ ظ…ط³ط¨ظ‚ظ‹ط§.",
+          "This request has already been processed.",
+        )
+      : errorCode === "REQUEST_NOT_FOUND"
+        ? message(
+            arabic,
+            "ط§ظ„ط·ظ„ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯.",
+            "Request not found.",
+          )
+        : errorCode === "PAYMENT_NOT_FOUND"
+          ? message(
+              arabic,
+              "لا يوجد دفع مرتبط بهذا الطلب.",
+              "No payment is linked to this request.",
+            )
+          : errorCode === "PAYMENT_ALREADY_PROCESSED"
+            ? message(
+                arabic,
+                "تمت معالجة الدفع المرتبط بهذا الطلب بالفعل.",
+                "The payment linked to this request has already been processed.",
+              )
+            : message(
+                arabic,
+                "طھط¹ط°ط± ط±ظپط¶ ط·ظ„ط¨ ط§ظ„ط§ط´طھط±ط§ظƒ.",
+                "Could not reject the request.",
+              );
 
-  revalidatePath(`/${normalizeText(formData.get("locale"))}/admin/enrollment-requests`);
+  return { status: "error", message: errorMessage };
+}
+
+  const locale = normalizeText(formData.get("locale"));
+
+revalidatePath(`/${locale}/admin/enrollment-requests`);
+revalidatePath(`/${locale}/admin/payments`);
+revalidatePath(`/${locale}/admin`);
+revalidatePath(`/${locale}/dashboard`);
   return { status: "success", message: message(arabic, "تم رفض طلب الاشتراك.", "Request rejected.") };
 }

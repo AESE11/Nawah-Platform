@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
@@ -8,7 +9,6 @@ import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 import { getActiveEnrollmentForCourse } from "@/lib/services/enrollment-service";
-import { getStudentWatermarkId } from "@/lib/watermark";
 
 export default async function DashboardCoursePlayerPage({
   params,
@@ -53,7 +53,7 @@ export default async function DashboardCoursePlayerPage({
     redirect(`/${safeLocale}/dashboard/courses`);
   }
 
-  const watermarkId = getStudentWatermarkId(session.user.id);
+  const watermarkId = createHash("sha256").update(session.user.id).digest("hex").slice(0, 10).toUpperCase();
 
   const resolvedSearchParams = (await searchParams) ?? {};
   const selectedLessonId = resolvedSearchParams.lessonId ?? course.chapters[0]?.lessons[0]?.id ?? null;

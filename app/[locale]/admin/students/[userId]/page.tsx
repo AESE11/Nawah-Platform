@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { EnrollmentStatusActions } from "@/components/admin/enrollment-status-actions";
-import { WatermarkIdCopy } from "@/components/admin/watermark-id-copy";
 import { Card } from "@/components/ui/card";
-import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
-import { getStudentWatermarkId } from "@/lib/watermark";
 
 function getEnrollmentStatus(status: string, arabic: boolean) {
   if (status === "ACTIVE") return arabic ? "نشط" : "Active";
@@ -26,7 +23,6 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
   const { locale, userId } = await params;
   const safeLocale = isLocale(locale) ? locale : "ar";
   const arabic = safeLocale === "ar";
-  const dictionary = await getDictionary(safeLocale);
   const student = await prisma.user.findFirst({
     where: { id: userId, role: "STUDENT" },
     select: {
@@ -45,8 +41,6 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
     return <Card className="p-8 text-slate-600">{arabic ? "الطالب غير موجود." : "Student not found."}</Card>;
   }
 
-  const watermarkId = `ID-${getStudentWatermarkId(student.id)}`;
-
   return (
     <div className="space-y-6">
       <AdminBreadcrumbs locale={safeLocale} items={[{ href: "/admin/students", label: arabic ? "الطلاب" : "Students" }, { label: student.name ?? student.email }]} />
@@ -54,17 +48,6 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
         <h1 className="text-3xl font-bold text-slate-900">{student.name ?? student.email}</h1>
         <p className="mt-2 text-slate-600">{student.email}</p>
         <p className="mt-3 text-sm text-slate-500">{arabic ? "إنشاء الحساب: " : "Account created: "}{student.createdAt.toLocaleDateString()}</p>
-        <div className="mt-5 border-t border-slate-200 pt-4">
-          <p className="text-sm font-medium text-slate-700">{dictionary.admin.watermarkId}</p>
-          <div className="mt-2">
-            <WatermarkIdCopy
-              watermarkId={watermarkId}
-              copyLabel={dictionary.admin.copy}
-              copiedLabel={dictionary.admin.copied}
-              copyFailedLabel={dictionary.admin.copyFailed}
-            />
-          </div>
-        </div>
       </Card>
 
       <Card className="p-6">
