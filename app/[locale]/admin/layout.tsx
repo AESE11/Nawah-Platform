@@ -23,6 +23,8 @@ const adminNavigation = [
   { href: "payments", label: "Payments" },
   { href: "payment-methods", label: "Payment methods" },
   { href: "enrollments", label: "Enrollments" },
+  { href: "enrollment-requests", label: "Enrollment requests" },
+  { href: "students", label: "Students" },
   { href: "users", label: "Users" },
 ] as const;
 
@@ -85,6 +87,10 @@ export default async function AdminLayout({
                             ? "طرق الدفع"
                             : item.href === "enrollments"
                               ? "الاشتراكات"
+                              : item.href === "enrollment-requests"
+                                ? "طلبات الاشتراك"
+                                : item.href === "students"
+                                  ? "الطلاب"
                               : "المستخدمون"
                   : item.label}
               </Link>

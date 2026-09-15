@@ -1,9 +1,15 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EnrollmentRequestForm } from "@/components/enrollment/enrollment-request-form";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getAuthSession } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
+import { getActiveEnrollmentForCourse } from "@/lib/services/enrollment-service";
+import { getPaymentMethods } from "@/lib/services/payment-service";
 
 export default async function CourseSlugPage({
   params,
@@ -31,8 +37,24 @@ export default async function CourseSlugPage({
     notFound();
   }
 
+  const session = await getAuthSession();
+  const paymentMethods = await getPaymentMethods();
+  const activeEnrollment = session?.user?.role === "STUDENT"
+    ? await getActiveEnrollmentForCourse(session.user.id, course.id)
+    : null;
+  const latestEnrollmentRequest = session?.user?.role === "STUDENT" && !activeEnrollment
+    ? await prisma.enrollmentRequest.findFirst({
+        where: { userId: session.user.id, courseId: course.id },
+        orderBy: { createdAt: "desc" },
+      })
+    : null;
+
   const title = safeLocale === "ar" ? course.titleAr : course.titleEn;
+  const shortDescription = safeLocale === "ar" ? course.shortDescriptionAr : course.shortDescriptionEn;
   const description = safeLocale === "ar" ? course.descriptionAr : course.descriptionEn;
+  const features = safeLocale === "ar" ? course.featuresAr : course.featuresEn;
+  const outcomes = safeLocale === "ar" ? course.outcomesAr : course.outcomesEn;
+  const benefits = safeLocale === "ar" ? course.benefitsAr : course.benefitsEn;
 
   return (
     <div className="space-y-8">
@@ -55,13 +77,38 @@ export default async function CourseSlugPage({
           </div>
 
           <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
-          <p className="text-slate-600">{description || ""}</p>
+          {shortDescription ? <p className="text-lg leading-8 text-slate-600">{shortDescription}</p> : null}
+          {description ? <p className="whitespace-pre-wrap leading-7 text-slate-600">{description}</p> : null}
           <div className="flex items-center justify-between gap-3">
             <span className="text-2xl font-bold text-slate-900">{course.price ? `${course.price} SAR` : "Free"}</span>
             <span className="text-sm text-slate-500">{safeLocale === "ar" ? "الحالة" : "Status"}: {course.status}</span>
           </div>
         </div>
       </Card>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        {[
+          {
+            title: safeLocale === "ar" ? "ما يميز الدورة" : "What makes this course special",
+            content: features,
+          },
+          {
+            title: safeLocale === "ar" ? "مخرجات الدورة" : "What you will learn",
+            content: outcomes,
+          },
+          {
+            title: safeLocale === "ar" ? "فوائد الدورة" : "Course benefits",
+            content: benefits,
+          },
+        ].map((section) => (
+          <Card key={section.title} className="p-6">
+            <h2 className="text-xl font-bold text-slate-900">{section.title}</h2>
+            <p className="mt-3 whitespace-pre-wrap leading-7 text-slate-600">
+              {section.content || (safeLocale === "ar" ? "ستتم إضافة التفاصيل قريبًا." : "Details will be added soon.")}
+            </p>
+          </Card>
+        ))}
+      </div>
 
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-slate-900">{dictionary.common.courses}</h2>
@@ -75,9 +122,16 @@ export default async function CourseSlugPage({
         {course.chapters.map((chapter) => (
           <Card key={chapter.id} className="p-6">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-xl font-semibold text-slate-900">
-                {safeLocale === "ar" ? chapter.titleAr : chapter.titleEn}
-              </h3>
+              <div>
+                <h3 className="text-xl font-semibold text-slate-900">
+                  {safeLocale === "ar" ? chapter.titleAr : chapter.titleEn}
+                </h3>
+                {(safeLocale === "ar" ? chapter.descriptionAr : chapter.descriptionEn) ? (
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                    {safeLocale === "ar" ? chapter.descriptionAr : chapter.descriptionEn}
+                  </p>
+                ) : null}
+              </div>
               <span className="text-sm text-slate-500">{safeLocale === "ar" ? `الفصل ${chapter.order + 1}` : `Chapter ${chapter.order + 1}`}</span>
             </div>
 
@@ -89,24 +143,136 @@ export default async function CourseSlugPage({
               ) : null}
 
               {chapter.lessons.map((lesson) => (
-                <div key={lesson.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="font-medium text-slate-900">
-                      {safeLocale === "ar" ? lesson.titleAr : lesson.titleEn}
-                    </h4>
-                    {lesson.duration ? (
-                      <span className="text-xs text-slate-500">{lesson.duration}s</span>
-                    ) : null}
+                <Link href={`/${safeLocale}/dashboard/courses/${course.id}?lessonId=${lesson.id}`} key={lesson.id} className="block">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <h4 className="font-medium text-slate-900">
+                        {safeLocale === "ar" ? lesson.titleAr : lesson.titleEn}
+                      </h4>
+                      {lesson.duration ? (
+                        <span className="text-xs text-slate-500">{lesson.duration}s</span>
+                      ) : null}
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {safeLocale === "ar" ? lesson.descriptionAr || "" : lesson.descriptionEn || ""}
+                    </p>
                   </div>
-                  <p className="mt-2 text-sm text-slate-600">
-                    {safeLocale === "ar" ? lesson.descriptionAr || "" : lesson.descriptionEn || ""}
-                  </p>
-                </div>
+                </Link>
               ))}
             </div>
           </Card>
         ))}
       </div>
+
+      <Card className="p-6 sm:p-8">
+        <div className="flex flex-col gap-3 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-teal-700">
+              {safeLocale === "ar" ? "طريقة الاشتراك في الدورة" : "How to enroll"}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900">
+              {safeLocale === "ar" ? "التسجيل اليدوي بعد التحقق من الدفع" : "Manual enrollment after payment verification"}
+            </h2>
+          </div>
+          <span className="text-2xl font-bold text-slate-900">{course.price ? `${course.price} SAR` : "Free"}</span>
+        </div>
+
+        <ol className="mt-6 list-decimal space-y-3 ps-6 leading-7 text-slate-700">
+          {safeLocale === "ar" ? (
+            <>
+              <li>حوّل قيمة الدورة إلى رقم المحفظة الموضح في وسيلة الدفع المتاحة أدناه.</li>
+              <li>احتفظ بصورة أو لقطة شاشة لإيصال التحويل.</li>
+              <li>أرسل الإيصال عبر واتساب إلى رقم المحفظة نفسه عند توفر قناة التواصل.</li>
+              <li>
+                أرفق مع الإيصال: الاسم الرباعي، البريد الإلكتروني المستخدم في حساب الموقع، رقم المحفظة التي تم التحويل منها، رقم الهاتف الشخصي، اسم الدورة، وصورة إيصال التحويل.
+              </li>
+              <li>بعد مراجعة الدفع والتحقق منه، سيقوم المسؤول بتفعيل اشتراك الطالب.</li>
+            </>
+          ) : (
+            <>
+              <li>Transfer the course price to the wallet number shown in the available payment method below.</li>
+              <li>Keep a screenshot or photo of the transfer receipt.</li>
+              <li>Send the receipt through WhatsApp to the same wallet number when the contact channel is available.</li>
+              <li>
+                Include your full name, the email used for your website account, the wallet number used for the transfer, your personal phone number, the course name, and the transfer receipt.
+              </li>
+              <li>After the payment is reviewed and verified, the administrator will activate your enrollment.</li>
+            </>
+          )}
+        </ol>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {paymentMethods.length > 0 ? paymentMethods.map((method) => (
+            <div key={method.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-900">{safeLocale === "ar" ? method.nameAr : method.nameEn}</h3>
+              {(safeLocale === "ar" ? method.instructionsAr : method.instructionsEn) ? (
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                  {safeLocale === "ar" ? method.instructionsAr : method.instructionsEn}
+                </p>
+              ) : null}
+              {(safeLocale === "ar" ? method.accountDetailsAr : method.accountDetailsEn) ? (
+                <p className="mt-2 whitespace-pre-wrap font-medium leading-6 text-slate-800">
+                  {safeLocale === "ar" ? method.accountDetailsAr : method.accountDetailsEn}
+                </p>
+              ) : null}
+            </div>
+          )) : (
+            <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              {safeLocale === "ar"
+                ? "سيتم عرض رقم المحفظة وتعليمات الدفع هنا بعد إعداد وسيلة دفع مفعلة من لوحة الإدارة."
+                : "The wallet number and payment instructions will appear here after an enabled payment method is configured in the admin area."}
+            </p>
+          )}
+        </div>
+
+        <p className="mt-6 text-sm leading-6 text-slate-500">
+          {safeLocale === "ar"
+            ? "يجب أن يكون البريد الإلكتروني المرسل مع الإيصال هو نفسه البريد المستخدم في حساب الطالب بالموقع."
+            : "The email submitted with the receipt must be the same email used for the student website account."}
+        </p>
+
+        <div className="mt-8 border-t border-slate-200 pt-6">
+          <h3 className="text-xl font-bold text-slate-900">
+            {safeLocale === "ar" ? "طلب الاشتراك في الدورة" : "Request enrollment"}
+          </h3>
+          {activeEnrollment ? (
+            <p className="mt-3 rounded-xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+              {safeLocale === "ar" ? "أنت مشترك بالفعل في هذه الدورة." : "You are already enrolled in this course."}
+            </p>
+          ) : latestEnrollmentRequest?.status === "PENDING" ? (
+            <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+              {safeLocale === "ar" ? "تم إرسال طلب الاشتراك بنجاح، وسيتم مراجعته من الإدارة. الحالة: قيد المراجعة" : "Your enrollment request was submitted successfully and will be reviewed by the administration. Status: Under review"}
+            </p>
+          ) : latestEnrollmentRequest?.status === "REJECTED" ? (
+            <div className="mt-3 rounded-xl bg-red-50 p-4 text-sm leading-6 text-red-800">
+              <p>{safeLocale === "ar" ? "تم رفض طلب الاشتراك." : "Your enrollment request was rejected."}</p>
+              {latestEnrollmentRequest.adminNotes ? <p className="mt-2 whitespace-pre-wrap">{latestEnrollmentRequest.adminNotes}</p> : null}
+            </div>
+          ) : session?.user?.role === "STUDENT" ? (
+            <EnrollmentRequestForm
+              courseId={course.id}
+              courseName={title}
+              email={session.user.email ?? ""}
+              locale={safeLocale}
+            />
+          ) : session?.user ? (
+            <p className="mt-3 text-sm text-slate-600">
+              {safeLocale === "ar" ? "يمكن للطلاب إرسال طلبات الاشتراك." : "Students can submit enrollment requests."}
+            </p>
+          ) : (
+            <div className="mt-4">
+              <p className="text-sm leading-6 text-slate-600">
+                {safeLocale === "ar" ? "يرجى تسجيل الدخول لإرسال طلب الاشتراك." : "Please log in to submit an enrollment request."}
+              </p>
+              <Link href={`/${safeLocale}/login?callbackUrl=${encodeURIComponent(`/${safeLocale}/courses/${course.slug}`)}`} className="mt-4 inline-block">
+                <Button type="button" className="min-h-11">
+                  {safeLocale === "ar" ? "تسجيل الدخول والمتابعة" : "Log in to continue"}
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

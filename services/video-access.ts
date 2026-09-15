@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getActiveEnrollmentForCourse } from "@/lib/services/enrollment-service";
-import { DEFAULT_MUX_PLAYBACK_TOKEN_TTL, generateMuxPlaybackToken, getMuxPlaybackTokenLifetimeMs, normalizePlaybackId } from "@/lib/mux";
+import { generateMuxPlaybackToken, getMuxPlaybackTokenLifetimeMs, normalizeMuxPlaybackTokenTtl, normalizePlaybackId } from "@/lib/mux";
 
 export interface LessonAccessEvaluationInput {
   userId?: string | null;
@@ -169,7 +169,7 @@ export async function getAuthorizedPlaybackToken({
     }
   }
 
-  const finalExpiration = expiration?.trim() || DEFAULT_MUX_PLAYBACK_TOKEN_TTL;
+  const finalExpiration = normalizeMuxPlaybackTokenTtl(expiration);
 
   const token = await generateMuxPlaybackToken(normalizedPlaybackId, {
     expiration: finalExpiration,

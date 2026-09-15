@@ -6,6 +6,7 @@ import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { ConfirmActionButton } from "@/components/admin/confirm-action";
 import { createCategoryAction, deleteCategoryAction, updateCategoryAction } from "@/lib/actions/content-actions";
 import { isLocale } from "@/lib/locale";
+import { contentLimits } from "@/lib/validation/content";
 
 export default async function AdminCategoriesPage({
   params,
@@ -65,19 +66,19 @@ export default async function AdminCategoriesPage({
         }} className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "الاسم بالعربية" : "Arabic name"}</span>
-            <input name="nameAr" required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="nameAr" required maxLength={contentLimits.categoryName} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "الاسم بالإنجليزية" : "English name"}</span>
-            <input name="nameEn" required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="nameEn" required maxLength={contentLimits.categoryName} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف بالعربية" : "Arabic description"}</span>
-            <textarea name="descriptionAr" rows={3} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="descriptionAr" rows={3} maxLength={contentLimits.categoryDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف بالإنجليزية" : "English description"}</span>
-            <textarea name="descriptionEn" rows={3} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="descriptionEn" rows={3} maxLength={contentLimits.categoryDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <div className="md:col-span-2">
             <Button type="submit">

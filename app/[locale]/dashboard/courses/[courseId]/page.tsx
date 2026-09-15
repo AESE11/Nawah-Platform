@@ -8,6 +8,7 @@ import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 import { getActiveEnrollmentForCourse } from "@/lib/services/enrollment-service";
+import { getStudentWatermarkId } from "@/lib/watermark";
 
 export default async function DashboardCoursePlayerPage({
   params,
@@ -52,6 +53,8 @@ export default async function DashboardCoursePlayerPage({
     redirect(`/${safeLocale}/dashboard/courses`);
   }
 
+  const watermarkId = getStudentWatermarkId(session.user.id);
+
   const resolvedSearchParams = (await searchParams) ?? {};
   const selectedLessonId = resolvedSearchParams.lessonId ?? course.chapters[0]?.lessons[0]?.id ?? null;
   const selectedLesson = course.chapters
@@ -92,6 +95,7 @@ export default async function DashboardCoursePlayerPage({
           ) : (
             <SecureMuxVideoPlayer
               lessonId={selectedLesson.id}
+              watermarkId={watermarkId}
               locale={safeLocale}
               title={safeLocale === "ar" ? selectedLesson.titleAr : selectedLesson.titleEn}
               loadingMessage={safeLocale === "ar" ? "جارٍ تحميل الفيديو..." : "Loading video..."}

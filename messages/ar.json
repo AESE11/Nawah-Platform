@@ -92,7 +92,11 @@
     "lessons": "الدروس",
     "newCourse": "دورة جديدة",
     "newCategory": "فئة جديدة",
-    "backToCourses": "العودة إلى الدورات"
+    "backToCourses": "العودة إلى الدورات",
+    "watermarkId": "معرف العلامة المائية",
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "copyFailed": "تعذر النسخ"
   },
   "video": {
     "loading": "جارٍ تحميل الفيديو...",

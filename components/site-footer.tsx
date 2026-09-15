@@ -9,7 +9,7 @@ type TranslationDictionary = {
 
 export function SiteFooter({ locale, dictionary }: { locale: Locale; dictionary: TranslationDictionary }) {
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer className="mt-auto border-t border-slate-200 bg-white">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div>
           <p className="text-base font-semibold text-slate-900">{dictionary.layout?.brand ?? "Education Platform"}</p>

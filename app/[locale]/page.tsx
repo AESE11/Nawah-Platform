@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getAuthSession } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
 
@@ -11,6 +12,12 @@ export default async function LocaleHomePage({
   const { locale } = await params;
   const safeLocale = isLocale(locale) ? locale : "ar";
   const dictionary = await getDictionary(safeLocale);
+  const session = await getAuthSession();
+  const getStartedHref = session?.user?.role === "ADMIN"
+    ? `/${safeLocale}/admin`
+    : session?.user?.role === "STUDENT"
+      ? `/${safeLocale}/dashboard`
+      : `/${safeLocale}/register`;
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 md:p-8 lg:p-10">
@@ -26,7 +33,7 @@ export default async function LocaleHomePage({
           <Link href={`/${safeLocale}/courses`}>
             <Button className="min-h-11">{dictionary.home.ctaPrimary}</Button>
           </Link>
-          <Link href={`/${safeLocale}/register`}>
+          <Link href={getStartedHref}>
             <Button variant="outline" className="min-h-11">{dictionary.home.ctaSecondary}</Button>
           </Link>
         </div>

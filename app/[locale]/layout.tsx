@@ -49,9 +49,9 @@ export default async function LocaleLayout({
       dir={direction}
       className={`${inter.variable} ${tajawal.variable} min-h-screen bg-slate-50 text-slate-900 antialiased`}
     >
-      <div className="min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <SiteHeader locale={locale as Locale} dictionary={dictionary} />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
         <SiteFooter locale={locale as Locale} dictionary={dictionary} />
       </div>
     </div>

@@ -92,7 +92,11 @@
     "lessons": "Lessons",
     "newCourse": "New course",
     "newCategory": "New category",
-    "backToCourses": "Back to courses"
+    "backToCourses": "Back to courses",
+    "watermarkId": "Watermark ID",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Copy failed"
   },
   "video": {
     "loading": "Loading video...",

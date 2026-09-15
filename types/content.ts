@@ -40,6 +40,12 @@ export interface CourseRecord {
   shortDescriptionEn?: string | null;
   descriptionAr?: string | null;
   descriptionEn?: string | null;
+  featuresAr?: string | null;
+  featuresEn?: string | null;
+  outcomesAr?: string | null;
+  outcomesEn?: string | null;
+  benefitsAr?: string | null;
+  benefitsEn?: string | null;
   price: string | number;
   thumbnailUrl?: string | null;
   thumbnailPublicId?: string | null;

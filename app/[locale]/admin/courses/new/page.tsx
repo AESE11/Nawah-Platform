@@ -5,6 +5,7 @@ import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { createCourseAction } from "@/lib/actions/content-actions";
 import { prisma } from "@/lib/prisma";
 import { isLocale } from "@/lib/locale";
+import { contentLimits } from "@/lib/validation/content";
 
 export default async function AdminCreateCoursePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -26,15 +27,15 @@ export default async function AdminCreateCoursePage({ params }: { params: Promis
         }} className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "العنوان بالعربية" : "Arabic title"}</span>
-            <input name="titleAr" required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="titleAr" required maxLength={contentLimits.courseTitle} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "العنوان بالإنجليزية" : "English title"}</span>
-            <input name="titleEn" required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="titleEn" required maxLength={contentLimits.courseTitle} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "الرابط" : "Slug"}</span>
-            <input name="slug" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="slug" maxLength={contentLimits.courseSlug} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "السعر" : "Price"}</span>
@@ -42,19 +43,43 @@ export default async function AdminCreateCoursePage({ params }: { params: Promis
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف المختصر بالعربية" : "Arabic short description"}</span>
-            <textarea name="shortDescriptionAr" rows={2} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="shortDescriptionAr" rows={2} maxLength={contentLimits.courseShortDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف المختصر بالإنجليزية" : "English short description"}</span>
-            <textarea name="shortDescriptionEn" rows={2} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="shortDescriptionEn" rows={2} maxLength={contentLimits.courseShortDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف بالعربية" : "Arabic description"}</span>
-            <textarea name="descriptionAr" rows={4} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="descriptionAr" rows={4} maxLength={contentLimits.courseDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف بالإنجليزية" : "English description"}</span>
-            <textarea name="descriptionEn" rows={4} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="descriptionEn" rows={4} maxLength={contentLimits.courseDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "ما يميز الدورة" : "Course features"}</span>
+            <textarea name="featuresAr" rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "مخرجات / نتائج الدورة" : "Course outcomes"}</span>
+            <textarea name="outcomesAr" rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "فوائد الدورة" : "Course benefits"}</span>
+            <textarea name="benefitsAr" rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "ما يميز الدورة (بالإنجليزية)" : "Course features"}</span>
+            <textarea name="featuresEn" rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "مخرجات / نتائج الدورة (بالإنجليزية)" : "Course outcomes"}</span>
+            <textarea name="outcomesEn" rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "فوائد الدورة (بالإنجليزية)" : "Course benefits"}</span>
+            <textarea name="benefitsEn" rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "الفئة" : "Category"}</span>
@@ -79,7 +104,7 @@ export default async function AdminCreateCoursePage({ params }: { params: Promis
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "رابط الصورة" : "Thumbnail URL"}</span>
-            <input name="thumbnailUrl" type="url" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="thumbnailUrl" type="url" maxLength={contentLimits.thumbnailUrl} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <div className="md:col-span-2 flex gap-3">
             <Button type="submit">{safeLocale === "ar" ? "حفظ الدورة" : "Save course"}</Button>

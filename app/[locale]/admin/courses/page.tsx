@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getAdminCourses } from "@/lib/services/admin-service";
 import { isLocale } from "@/lib/locale";
@@ -13,6 +15,9 @@ export default async function AdminCoursesPage({ params }: { params: Promise<{ l
         <h1 className="text-2xl font-bold text-slate-900">
           {safeLocale === "ar" ? "إدارة الدورات" : "Course management"}
         </h1>
+        <Link href={`/${safeLocale}/admin/courses/new`}>
+          <Button size="sm">{safeLocale === "ar" ? "دورة جديدة" : "New course"}</Button>
+        </Link>
       </div>
 
       {courses.length === 0 ? (
@@ -44,6 +49,9 @@ export default async function AdminCoursesPage({ params }: { params: Promise<{ l
                     <span>{safeLocale === "ar" ? `السعر: ${course.price}` : `Price: ${course.price}`}</span>
                     <span>{safeLocale === "ar" ? `الفصول: ${course.chapters.length}` : `Chapters: ${course.chapters.length}`}</span>
                     <span>{safeLocale === "ar" ? `الدروس: ${lessonCount}` : `Lessons: ${lessonCount}`}</span>
+                    <Link href={`/${safeLocale}/admin/courses/${course.id}`}>
+                      <Button size="sm" variant="secondary">{safeLocale === "ar" ? "إدارة" : "Manage"}</Button>
+                    </Link>
                   </div>
                 </div>
               </Card>

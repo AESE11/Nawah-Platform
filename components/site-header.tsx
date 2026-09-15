@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
 import { type Locale } from "@/lib/locale";
@@ -14,10 +15,40 @@ type TranslationDictionary = {
 
 export function SiteHeader({ locale, dictionary }: { locale: Locale; dictionary: TranslationDictionary }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [authenticatedRole, setAuthenticatedRole] = useState<"STUDENT" | "ADMIN" | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSession() {
+      const response = await fetch("/api/auth/session", { cache: "no-store" });
+      const session = (await response.json()) as { user?: { role?: "STUDENT" | "ADMIN" } };
+
+      if (isMounted) {
+        setAuthenticatedRole(session.user?.role ?? null);
+      }
+    }
+
+    void loadSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  function handleLogout() {
+    void signOut({ callbackUrl: "/ar" });
+  }
+
+  const isAuthenticated = authenticatedRole !== null;
+
   const navItems = [
     { href: `/${locale}`, label: dictionary.common?.home ?? "Home" },
     { href: `/${locale}/courses`, label: dictionary.common?.courses ?? "Courses" },
-    { href: `/${locale}/dashboard`, label: dictionary.common?.dashboard ?? "Dashboard" },
+    {
+      href: authenticatedRole === "ADMIN" ? `/${locale}/admin` : `/${locale}/dashboard`,
+      label: dictionary.common?.dashboard ?? "Dashboard",
+    },
     { href: `/${locale}/contact`, label: dictionary.common?.contact ?? "Contact" },
   ];
 
@@ -44,14 +75,22 @@ export function SiteHeader({ locale, dictionary }: { locale: Locale; dictionary:
               <LanguageSwitcher />
             </div>
             <div className="hidden items-center gap-2 md:flex">
-              <Link href={`/${locale}/login`}>
-                <Button variant="outline" size="sm">
-                  {dictionary.common?.login ?? "Login"}
+              {isAuthenticated ? (
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  {dictionary.common?.logout ?? "Logout"}
                 </Button>
-              </Link>
-              <Link href={`/${locale}/register`}>
-                <Button size="sm">{dictionary.common?.register ?? "Register"}</Button>
-              </Link>
+              ) : (
+                <>
+                  <Link href={`/${locale}/login`}>
+                    <Button variant="outline" size="sm">
+                      {dictionary.common?.login ?? "Login"}
+                    </Button>
+                  </Link>
+                  <Link href={`/${locale}/register`}>
+                    <Button size="sm">{dictionary.common?.register ?? "Register"}</Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             <button
@@ -83,14 +122,22 @@ export function SiteHeader({ locale, dictionary }: { locale: Locale; dictionary:
               ))}
             </nav>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <Link href={`/${locale}/login`} onClick={() => setIsMenuOpen(false)}>
-                <Button variant="outline" className="w-full">
-                  {dictionary.common?.login ?? "Login"}
+              {isAuthenticated ? (
+                <Button variant="outline" className="w-full" onClick={handleLogout}>
+                  {dictionary.common?.logout ?? "Logout"}
                 </Button>
-              </Link>
-              <Link href={`/${locale}/register`} onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full">{dictionary.common?.register ?? "Register"}</Button>
-              </Link>
+              ) : (
+                <>
+                  <Link href={`/${locale}/login`} onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      {dictionary.common?.login ?? "Login"}
+                    </Button>
+                  </Link>
+                  <Link href={`/${locale}/register`} onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full">{dictionary.common?.register ?? "Register"}</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         ) : null}

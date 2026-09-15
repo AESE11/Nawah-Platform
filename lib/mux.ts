@@ -1,27 +1,50 @@
 import Mux from "@mux/mux-node";
 
 export const DEFAULT_MUX_PLAYBACK_TOKEN_TTL = "1h";
+const MIN_MUX_PLAYBACK_TOKEN_TTL_MS = 5 * 60 * 1000;
+const MAX_MUX_PLAYBACK_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
-export function getMuxPlaybackTokenTtl() {
-  return process.env.MUX_PLAYBACK_TOKEN_TTL?.trim() || DEFAULT_MUX_PLAYBACK_TOKEN_TTL;
-}
-
-export function getMuxPlaybackTokenLifetimeMs(ttl: string = getMuxPlaybackTokenTtl()) {
+function parseMuxPlaybackTokenTtl(ttl: string): number | null {
   const match = ttl.trim().match(/^([0-9]+)([smhd])$/i);
 
   if (!match) {
-    return 60 * 60 * 1000;
+    return null;
   }
 
   const value = Number(match[1]);
   const unit = match[2].toLowerCase();
+  const multipliers: Record<string, number> = {
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+  };
+  const lifetimeMs = value * multipliers[unit];
 
-  if (unit === "s") return value * 1000;
-  if (unit === "m") return value * 60 * 1000;
-  if (unit === "h") return value * 60 * 60 * 1000;
-  if (unit === "d") return value * 24 * 60 * 60 * 1000;
+  return Number.isSafeInteger(lifetimeMs) ? lifetimeMs : null;
+}
 
-  return 60 * 60 * 1000;
+export function normalizeMuxPlaybackTokenTtl(ttl?: string | null) {
+  const candidate = ttl?.trim() || DEFAULT_MUX_PLAYBACK_TOKEN_TTL;
+  const lifetimeMs = parseMuxPlaybackTokenTtl(candidate);
+
+  if (
+    lifetimeMs === null ||
+    lifetimeMs < MIN_MUX_PLAYBACK_TOKEN_TTL_MS ||
+    lifetimeMs > MAX_MUX_PLAYBACK_TOKEN_TTL_MS
+  ) {
+    return DEFAULT_MUX_PLAYBACK_TOKEN_TTL;
+  }
+
+  return candidate;
+}
+
+export function getMuxPlaybackTokenTtl() {
+  return normalizeMuxPlaybackTokenTtl(process.env.MUX_PLAYBACK_TOKEN_TTL);
+}
+
+export function getMuxPlaybackTokenLifetimeMs(ttl: string = getMuxPlaybackTokenTtl()) {
+  return parseMuxPlaybackTokenTtl(normalizeMuxPlaybackTokenTtl(ttl)) ?? 60 * 60 * 1000;
 }
 
 export interface MuxServerConfig {
@@ -73,7 +96,7 @@ export async function generateMuxPlaybackToken(
   options: GenerateMuxPlaybackTokenOptions = {},
 ): Promise<string> {
   const normalizedPlaybackId = normalizePlaybackId(playbackId);
-  const expiration = options.expiration?.trim() || getMuxPlaybackTokenTtl();
+  const expiration = normalizeMuxPlaybackTokenTtl(options.expiration || getMuxPlaybackTokenTtl());
 
   try {
     const { signingKey, privateKey, tokenId, tokenSecret } = getMuxConfig();

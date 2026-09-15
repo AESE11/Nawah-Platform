@@ -34,6 +34,12 @@ enum EnrollmentStatus {
   COMPLETED
 }
 
+enum EnrollmentRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id               String       @id @default(cuid())
   name             String?
@@ -47,6 +53,7 @@ model User {
   payments         Payment[]
   reviewedPayments Payment[]    @relation("ReviewedPayments")
   enrollments      Enrollment[]
+  enrollmentRequests EnrollmentRequest[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 }
@@ -110,6 +117,12 @@ model Course {
   shortDescriptionEn String?
   descriptionAr      String?
   descriptionEn      String?
+  featuresAr         String?
+  featuresEn         String?
+  outcomesAr         String?
+  outcomesEn         String?
+  benefitsAr         String?
+  benefitsEn         String?
   price              Decimal      @db.Decimal(10, 2)
   thumbnailUrl       String?
   thumbnailPublicId  String?
@@ -122,6 +135,7 @@ model Course {
   chapters           Chapter[]
   payments           Payment[]
   enrollments        Enrollment[]
+  enrollmentRequests EnrollmentRequest[]
 
   @@index([categoryId])
   @@index([status])
@@ -223,6 +237,33 @@ model Enrollment {
   course     Course           @relation(fields: [courseId], references: [id], onDelete: Restrict)
 
   @@unique([userId, courseId])
+  @@index([userId, status])
+  @@index([courseId, status])
+  @@index([status, createdAt])
+}
+
+model EnrollmentRequest {
+  id                    String                 @id @default(cuid())
+  userId                String
+  courseId              String
+  fullName              String
+  email                 String
+  transferWalletNumber  String
+  personalPhoneNumber   String
+  courseName            String
+  coursePrice           Decimal                @db.Decimal(10, 2)
+  currency              String                 @default("SAR")
+  receiptUrl            String
+  receiptPublicId       String?
+  status                EnrollmentRequestStatus @default(PENDING)
+  adminNotes            String?
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course                Course                 @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
   @@index([userId, status])
   @@index([courseId, status])
   @@index([status, createdAt])

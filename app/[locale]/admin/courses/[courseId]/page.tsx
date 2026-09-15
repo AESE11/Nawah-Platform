@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { ConfirmActionButton } from "@/components/admin/confirm-action";
-import { createChapterAction, createLessonAction, deleteCourseAction, deleteLessonAction, updateCourseAction } from "@/lib/actions/content-actions";
+import { createChapterAction, createLessonAction, deleteChapterAction, deleteCourseAction, deleteLessonAction, moveChapterAction, moveLessonAction, updateChapterAction, updateCourseAction, updateLessonAction } from "@/lib/actions/content-actions";
 import { prisma } from "@/lib/prisma";
 import { isLocale } from "@/lib/locale";
+import { contentLimits } from "@/lib/validation/content";
 
 export default async function AdminCourseDetailPage({
   params,
@@ -29,6 +30,8 @@ export default async function AdminCourseDetailPage({
       },
     },
   });
+
+  const categories = await prisma.category.findMany({ orderBy: { nameAr: "asc" } });
 
   if (!course) {
     return (
@@ -79,11 +82,15 @@ export default async function AdminCourseDetailPage({
           <input type="hidden" name="courseId" value={course.id} />
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "العنوان بالعربية" : "Arabic title"}</span>
-            <input name="titleAr" defaultValue={course.titleAr} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="titleAr" defaultValue={course.titleAr} required maxLength={contentLimits.courseTitle} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "العنوان بالإنجليزية" : "English title"}</span>
-            <input name="titleEn" defaultValue={course.titleEn} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <input name="titleEn" defaultValue={course.titleEn} required maxLength={contentLimits.courseTitle} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700">
+            <span>{safeLocale === "ar" ? "الرابط" : "Slug"}</span>
+            <input name="slug" defaultValue={course.slug} required maxLength={contentLimits.courseSlug} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>{safeLocale === "ar" ? "السعر" : "Price"}</span>
@@ -97,21 +104,57 @@ export default async function AdminCourseDetailPage({
               <option value="ARCHIVED">Archived</option>
             </select>
           </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700">
+            <span>{safeLocale === "ar" ? "الفئة" : "Category"}</span>
+            <select name="categoryId" defaultValue={course.categoryId} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400">
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>{safeLocale === "ar" ? category.nameAr : category.nameEn}</option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "رابط الصورة" : "Thumbnail URL"}</span>
+            <input name="thumbnailUrl" type="url" defaultValue={course.thumbnailUrl ?? ""} maxLength={contentLimits.thumbnailUrl} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف المختصر بالعربية" : "Arabic short description"}</span>
-            <textarea name="shortDescriptionAr" defaultValue={course.shortDescriptionAr ?? ""} rows={3} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="shortDescriptionAr" defaultValue={course.shortDescriptionAr ?? ""} rows={3} maxLength={contentLimits.courseShortDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف المختصر بالإنجليزية" : "English short description"}</span>
-            <textarea name="shortDescriptionEn" defaultValue={course.shortDescriptionEn ?? ""} rows={3} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="shortDescriptionEn" defaultValue={course.shortDescriptionEn ?? ""} rows={3} maxLength={contentLimits.courseShortDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف بالعربية" : "Arabic description"}</span>
-            <textarea name="descriptionAr" defaultValue={course.descriptionAr ?? ""} rows={4} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="descriptionAr" defaultValue={course.descriptionAr ?? ""} rows={4} maxLength={contentLimits.courseDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
             <span>{safeLocale === "ar" ? "الوصف بالإنجليزية" : "English description"}</span>
-            <textarea name="descriptionEn" defaultValue={course.descriptionEn ?? ""} rows={4} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+            <textarea name="descriptionEn" defaultValue={course.descriptionEn ?? ""} rows={4} maxLength={contentLimits.courseDescription} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "ما يميز الدورة" : "Course features"}</span>
+            <textarea name="featuresAr" defaultValue={course.featuresAr ?? ""} rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "مخرجات / نتائج الدورة" : "Course outcomes"}</span>
+            <textarea name="outcomesAr" defaultValue={course.outcomesAr ?? ""} rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "فوائد الدورة" : "Course benefits"}</span>
+            <textarea name="benefitsAr" defaultValue={course.benefitsAr ?? ""} rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "ما يميز الدورة (بالإنجليزية)" : "Course features"}</span>
+            <textarea name="featuresEn" defaultValue={course.featuresEn ?? ""} rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "مخرجات / نتائج الدورة (بالإنجليزية)" : "Course outcomes"}</span>
+            <textarea name="outcomesEn" defaultValue={course.outcomesEn ?? ""} rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
+          </label>
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span>{safeLocale === "ar" ? "فوائد الدورة (بالإنجليزية)" : "Course benefits"}</span>
+            <textarea name="benefitsEn" defaultValue={course.benefitsEn ?? ""} rows={3} maxLength={contentLimits.courseInformation} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-slate-400" />
           </label>
           <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
             <input type="checkbox" name="featured" defaultChecked={course.featured} />
@@ -130,7 +173,51 @@ export default async function AdminCourseDetailPage({
             <div key={chapter.id} className="rounded-2xl border border-slate-200 p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-lg font-semibold text-slate-900">{safeLocale === "ar" ? chapter.titleAr : chapter.titleEn}</p>
+                <div className="flex gap-2">
+                  <form action={async (formData) => {
+                    "use server";
+                    await moveChapterAction(formData, safeLocale);
+                  }}>
+                    <input type="hidden" name="chapterId" value={chapter.id} />
+                    <input type="hidden" name="courseId" value={course.id} />
+                    <input type="hidden" name="direction" value="up" />
+                    <Button type="submit" size="sm" variant="secondary">↑</Button>
+                  </form>
+                  <form action={async (formData) => {
+                    "use server";
+                    await moveChapterAction(formData, safeLocale);
+                  }}>
+                    <input type="hidden" name="chapterId" value={chapter.id} />
+                    <input type="hidden" name="courseId" value={course.id} />
+                    <input type="hidden" name="direction" value="down" />
+                    <Button type="submit" size="sm" variant="secondary">↓</Button>
+                  </form>
+                  <form action={async (formData) => {
+                    "use server";
+                    await deleteChapterAction(formData, safeLocale);
+                  }}>
+                    <input type="hidden" name="chapterId" value={chapter.id} />
+                    <input type="hidden" name="courseId" value={course.id} />
+                    <ConfirmActionButton type="submit" size="sm" variant="outline" confirmText={safeLocale === "ar" ? "حذف هذا الفصل؟" : "Delete this chapter?"}>
+                      {safeLocale === "ar" ? "حذف" : "Delete"}
+                    </ConfirmActionButton>
+                  </form>
+                </div>
               </div>
+
+              <form action={async (formData) => {
+                "use server";
+                await updateChapterAction(formData, safeLocale);
+              }} className="mt-4 grid gap-3 md:grid-cols-2">
+                <input type="hidden" name="chapterId" value={chapter.id} />
+                <input type="hidden" name="courseId" value={course.id} />
+                <input name="titleAr" defaultValue={chapter.titleAr} required maxLength={contentLimits.chapterTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input name="titleEn" defaultValue={chapter.titleEn} required maxLength={contentLimits.chapterTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <textarea name="descriptionAr" defaultValue={chapter.descriptionAr ?? ""} rows={2} maxLength={contentLimits.chapterDescription} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <textarea name="descriptionEn" defaultValue={chapter.descriptionEn ?? ""} rows={2} maxLength={contentLimits.chapterDescription} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input type="hidden" name="order" value={chapter.order} />
+                <Button type="submit" size="sm">{safeLocale === "ar" ? "حفظ الفصل" : "Save chapter"}</Button>
+              </form>
 
               <form action={async (formData) => {
                 "use server";
@@ -138,10 +225,10 @@ export default async function AdminCourseDetailPage({
               }} className="mt-4 grid gap-3 md:grid-cols-2">
                 <input type="hidden" name="courseId" value={course.id} />
                 <input type="hidden" name="chapterId" value={chapter.id} />
-                <input name="titleAr" placeholder={safeLocale === "ar" ? "عنوان الدرس بالعربية" : "Arabic lesson title"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
-                <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الدرس بالإنجليزية" : "English lesson title"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
-                <input name="muxAssetId" placeholder={safeLocale === "ar" ? "Mux Asset ID" : "Mux Asset ID"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
-                <input name="muxPlaybackId" placeholder={safeLocale === "ar" ? "Mux Playback ID" : "Mux Playback ID"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input name="titleAr" placeholder={safeLocale === "ar" ? "عنوان الدرس بالعربية" : "Arabic lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الدرس بالإنجليزية" : "English lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input name="muxAssetId" placeholder={safeLocale === "ar" ? "Mux Asset ID" : "Mux Asset ID"} maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input name="muxPlaybackId" placeholder={safeLocale === "ar" ? "Mux Playback ID" : "Mux Playback ID"} maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <input name="duration" type="number" min="0" placeholder={safeLocale === "ar" ? "المدة (ثانية)" : "Duration (seconds)"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <Button type="submit" size="sm">{safeLocale === "ar" ? "إضافة درس" : "Add lesson"}</Button>
               </form>
@@ -151,18 +238,54 @@ export default async function AdminCourseDetailPage({
                   <div key={lesson.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium text-slate-900">{safeLocale === "ar" ? lesson.titleAr : lesson.titleEn}</span>
-                      <form action={async (formData) => {
-                        "use server";
-                        await deleteLessonAction(formData, safeLocale);
-                      }}>
-                        <input type="hidden" name="lessonId" value={lesson.id} />
-                        <input type="hidden" name="courseId" value={course.id} />
-                        <ConfirmActionButton type="submit" size="sm" variant="outline" confirmText={safeLocale === "ar" ? "حذف هذا الدرس؟" : "Delete this lesson?"}>
-                          {safeLocale === "ar" ? "حذف" : "Delete"}
-                        </ConfirmActionButton>
-                      </form>
+                      <div className="flex gap-2">
+                        <form action={async (formData) => {
+                          "use server";
+                          await moveLessonAction(formData, safeLocale);
+                        }}>
+                          <input type="hidden" name="lessonId" value={lesson.id} />
+                          <input type="hidden" name="courseId" value={course.id} />
+                          <input type="hidden" name="direction" value="up" />
+                          <Button type="submit" size="sm" variant="secondary">↑</Button>
+                        </form>
+                        <form action={async (formData) => {
+                          "use server";
+                          await moveLessonAction(formData, safeLocale);
+                        }}>
+                          <input type="hidden" name="lessonId" value={lesson.id} />
+                          <input type="hidden" name="courseId" value={course.id} />
+                          <input type="hidden" name="direction" value="down" />
+                          <Button type="submit" size="sm" variant="secondary">↓</Button>
+                        </form>
+                        <form action={async (formData) => {
+                          "use server";
+                          await deleteLessonAction(formData, safeLocale);
+                        }}>
+                          <input type="hidden" name="lessonId" value={lesson.id} />
+                          <input type="hidden" name="courseId" value={course.id} />
+                          <ConfirmActionButton type="submit" size="sm" variant="outline" confirmText={safeLocale === "ar" ? "حذف هذا الدرس؟" : "Delete this lesson?"}>
+                            {safeLocale === "ar" ? "حذف" : "Delete"}
+                          </ConfirmActionButton>
+                        </form>
+                      </div>
                     </div>
-                    <p className="mt-1 text-slate-600">{lesson.muxPlaybackId ?? safeLocale === "ar" ? "لا يوجد playback ID" : "No playback ID"}</p>
+                    <form action={async (formData) => {
+                      "use server";
+                      await updateLessonAction(formData, safeLocale);
+                    }} className="mt-3 grid gap-3 md:grid-cols-2">
+                      <input type="hidden" name="lessonId" value={lesson.id} />
+                      <input type="hidden" name="chapterId" value={chapter.id} />
+                      <input type="hidden" name="courseId" value={course.id} />
+                      <input name="titleAr" defaultValue={lesson.titleAr} required maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <input name="titleEn" defaultValue={lesson.titleEn} required maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <textarea name="descriptionAr" defaultValue={lesson.descriptionAr ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <textarea name="descriptionEn" defaultValue={lesson.descriptionEn ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <input name="muxAssetId" defaultValue={lesson.muxAssetId ?? ""} placeholder="Mux Asset ID" maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <input name="muxPlaybackId" defaultValue={lesson.muxPlaybackId ?? ""} placeholder="Mux Playback ID" maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <input name="duration" type="number" min="0" defaultValue={lesson.duration ?? ""} placeholder={safeLocale === "ar" ? "المدة (ثانية)" : "Duration (seconds)"} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <input type="hidden" name="order" value={lesson.order} />
+                      <Button type="submit" size="sm">{safeLocale === "ar" ? "حفظ الدرس" : "Save lesson"}</Button>
+                    </form>
                   </div>
                 ))}
               </div>
@@ -175,8 +298,8 @@ export default async function AdminCourseDetailPage({
           await createChapterAction(formData, safeLocale);
         }} className="mt-6 grid gap-3 md:grid-cols-2">
           <input type="hidden" name="courseId" value={course.id} />
-          <input name="titleAr" placeholder={safeLocale === "ar" ? "عنوان الفصل بالعربية" : "Arabic chapter title"} required className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
-          <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الفصل بالإنجليزية" : "English chapter title"} required className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+          <input name="titleAr" placeholder={safeLocale === "ar" ? "عنوان الفصل بالعربية" : "Arabic chapter title"} required maxLength={contentLimits.chapterTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+          <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الفصل بالإنجليزية" : "English chapter title"} required maxLength={contentLimits.chapterTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
           <Button type="submit" className="md:col-span-2">{safeLocale === "ar" ? "إضافة فصل" : "Add chapter"}</Button>
         </form>
       </Card>

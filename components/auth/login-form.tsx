@@ -11,12 +11,14 @@ import type { Locale } from "@/lib/locale";
 export function LoginForm({
   locale,
   dictionary,
+  callbackUrl = `/${locale}/dashboard`,
 }: {
   locale: Locale;
   dictionary: {
     auth: Record<string, string>;
     forms: Record<string, string>;
   };
+  callbackUrl?: string;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -42,7 +44,7 @@ export function LoginForm({
       return;
     }
 
-    router.push(`/${locale}/dashboard`);
+    router.push(callbackUrl);
     router.refresh();
   }
 
