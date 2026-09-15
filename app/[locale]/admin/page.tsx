@@ -49,9 +49,9 @@ export default async function AdminPage({ params }: { params: Promise<{ locale: 
             {safeLocale === "ar" ? "إجمالي الإيرادات المعتمدة" : "Approved revenue"}
           </h2>
           <p className="mt-4 text-4xl font-bold text-slate-900">
-            {new Intl.NumberFormat(safeLocale === "ar" ? "ar-SA" : "en-US", {
+            {new Intl.NumberFormat(safeLocale === "ar" ? "ar-EG" : "en-EG", {
               style: "currency",
-              currency: "SAR",
+              currency: "EGP",
               maximumFractionDigits: 2,
             }).format(overview.revenue)}
           </p>

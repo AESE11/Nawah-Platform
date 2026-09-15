@@ -4,6 +4,7 @@ import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { approvePaymentAction, rejectPaymentAction } from "@/lib/actions/payment-actions";
 import { prisma } from "@/lib/prisma";
 import { isLocale } from "@/lib/locale";
+import { formatEgpCurrency } from "@/lib/currency";
 
 export default async function AdminPaymentDetailPage({ params }: { params: Promise<{ locale: string; paymentId: string }> }) {
   const { locale, paymentId } = await params;
@@ -32,7 +33,7 @@ export default async function AdminPaymentDetailPage({ params }: { params: Promi
         <div className="mt-4 grid gap-4 md:grid-cols-2 text-sm text-slate-700">
           <p><strong>{safeLocale === "ar" ? "الطالب" : "Student"}:</strong> {payment.user.name ?? payment.user.email}</p>
           <p><strong>{safeLocale === "ar" ? "الدورة" : "Course"}:</strong> {safeLocale === "ar" ? payment.course.titleAr : payment.course.titleEn}</p>
-          <p><strong>{safeLocale === "ar" ? "المبلغ" : "Amount"}:</strong> {payment.amount.toString()} SAR</p>
+          <p><strong>{safeLocale === "ar" ? "المبلغ" : "Amount"}:</strong> {formatEgpCurrency(payment.amount.toString(), safeLocale)}</p>
           <p><strong>{safeLocale === "ar" ? "الحالة" : "Status"}:</strong> {payment.status}</p>
           <p><strong>{safeLocale === "ar" ? "طريقة الدفع" : "Method"}:</strong> {payment.paymentMethod.nameEn}</p>
           <p><strong>{safeLocale === "ar" ? "الإشارة" : "Reference"}:</strong> {payment.transactionReference ?? "—"}</p>

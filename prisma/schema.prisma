@@ -201,7 +201,7 @@ model Payment {
   userId               String
   courseId             String
   amount               Decimal       @db.Decimal(10, 2)
-  currency             String        @default("SAR")
+  currency             String        @default("EGP")
   paymentMethodId      String
   status               PaymentStatus @default(PENDING)
   transactionReference String?
@@ -252,7 +252,7 @@ model EnrollmentRequest {
   personalPhoneNumber   String
   courseName            String
   coursePrice           Decimal                @db.Decimal(10, 2)
-  currency              String                 @default("SAR")
+  currency              String                 @default("EGP")
   receiptUrl            String
   receiptPublicId       String?
   status                EnrollmentRequestStatus @default(PENDING)

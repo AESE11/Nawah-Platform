@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { prisma } from "@/lib/prisma";
 import { isLocale } from "@/lib/locale";
+import { formatEgpCurrency } from "@/lib/currency";
 
 export default async function AdminUserDetailPage({ params }: { params: Promise<{ locale: string; userId: string }> }) {
   const { locale, userId } = await params;
@@ -58,7 +59,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             {user.payments.map((payment) => (
               <div key={payment.id} className="rounded-xl border border-slate-200 p-3">
                 <p className="font-medium text-slate-900">{safeLocale === "ar" ? payment.course.titleAr : payment.course.titleEn}</p>
-                <p className="text-sm text-slate-600">{payment.status} • {payment.amount.toString()} SAR</p>
+                <p className="text-sm text-slate-600">{payment.status} • {formatEgpCurrency(payment.amount.toString(), safeLocale)}</p>
               </div>
             ))}
           </div>

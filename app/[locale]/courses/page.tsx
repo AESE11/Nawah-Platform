@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
+import { formatCoursePrice } from "@/lib/currency";
 
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -54,7 +55,11 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
                 <h2 className="text-xl font-bold text-slate-900">{title}</h2>
                 <p className="text-sm text-slate-600">{description || ""}</p>
                 <div className="flex items-center justify-between pt-2">
-                  <span className="text-lg font-bold text-slate-900">{course.price ? `${course.price} SAR` : "Free"}</span>
+                  <span className="text-lg font-bold text-slate-900">{Number(course.price) > 0
+  ? formatCoursePrice(course.price.toString(), safeLocale)
+  : safeLocale === "ar"
+    ? "مجانية"
+    : "Free"}</span>
                   <span className="text-sm text-slate-500">{safeLocale === "ar" ? "عرض" : "View"}</span>
                 </div>
               </div>

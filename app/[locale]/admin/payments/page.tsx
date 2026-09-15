@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { approvePaymentAction, rejectPaymentAction } from "@/lib/actions/payment-actions";
 import { getAdminPayments } from "@/lib/services/admin-service";
 import { isLocale } from "@/lib/locale";
+import { formatEgpCurrency } from "@/lib/currency";
 
 export default async function AdminPaymentsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -32,7 +33,7 @@ export default async function AdminPaymentsPage({ params }: { params: Promise<{ 
                   {payment.user.name ?? payment.user.email} • {payment.user.email}
                 </p>
                 <p className="text-sm text-slate-600">
-                  {payment.paymentMethod.nameEn} • {payment.amount.toString()} SAR
+                  {payment.paymentMethod.nameEn} • {formatEgpCurrency(payment.amount.toString(), safeLocale)}
                 </p>
                 {payment.transactionReference ? (
                   <p className="text-sm text-slate-600">

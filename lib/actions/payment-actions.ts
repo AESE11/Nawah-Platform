@@ -45,7 +45,7 @@ export async function requestEnrollmentAction(formData: FormData, locale: string
       userId: session.user.id,
       courseId: course.id,
       amount: course.price,
-      currency: "SAR",
+      currency: "EGP",
       paymentMethodId: paymentMethod.id,
       status: "PENDING",
       transactionReference: parsed.transactionReference || null,

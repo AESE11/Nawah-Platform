@@ -10,6 +10,7 @@ import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 import { getActiveEnrollmentForCourse } from "@/lib/services/enrollment-service";
 import { getPaymentMethods } from "@/lib/services/payment-service";
+import { formatCoursePrice } from "@/lib/currency";
 
 export default async function CourseSlugPage({
   params,
@@ -80,7 +81,11 @@ export default async function CourseSlugPage({
           {shortDescription ? <p className="text-lg leading-8 text-slate-600">{shortDescription}</p> : null}
           {description ? <p className="whitespace-pre-wrap leading-7 text-slate-600">{description}</p> : null}
           <div className="flex items-center justify-between gap-3">
-            <span className="text-2xl font-bold text-slate-900">{course.price ? `${course.price} SAR` : "Free"}</span>
+            <span className="text-2xl font-bold text-slate-900">{Number(course.price) > 0
+  ? formatCoursePrice(course.price.toString(), safeLocale)
+  : safeLocale === "ar"
+    ? "مجانية"
+    : "Free"}</span>
             <span className="text-sm text-slate-500">{safeLocale === "ar" ? "الحالة" : "Status"}: {course.status}</span>
           </div>
         </div>
@@ -111,58 +116,111 @@ export default async function CourseSlugPage({
       </div>
 
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-900">{dictionary.common.courses}</h2>
+  <div>
+    <h2 className="text-2xl font-bold text-slate-900">
+      {dictionary.common.courses}
+    </h2>
 
-        {course.chapters.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
-            {safeLocale === "ar" ? "لا توجد فصول في هذه الدورة." : "This course has no chapters yet."}
-          </div>
-        ) : null}
+    <p className="mt-2 text-sm font-medium text-slate-600">
+      {safeLocale === "ar"
+        ? `إجمالي عدد الدروس: ${course.chapters.reduce(
+            (total, chapter) => total + chapter.lessons.length,
+            0,
+          )} درس`
+        : `Total number of lessons: ${course.chapters.reduce(
+            (total, chapter) => total + chapter.lessons.length,
+            0,
+          )} lessons`}
+    </p>
+  </div>
 
-        {course.chapters.map((chapter) => (
-          <Card key={chapter.id} className="p-6">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">
-                  {safeLocale === "ar" ? chapter.titleAr : chapter.titleEn}
-                </h3>
-                {(safeLocale === "ar" ? chapter.descriptionAr : chapter.descriptionEn) ? (
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
-                    {safeLocale === "ar" ? chapter.descriptionAr : chapter.descriptionEn}
-                  </p>
-                ) : null}
-              </div>
-              <span className="text-sm text-slate-500">{safeLocale === "ar" ? `الفصل ${chapter.order + 1}` : `Chapter ${chapter.order + 1}`}</span>
-            </div>
+  {course.chapters.length === 0 ? (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
+      {safeLocale === "ar"
+        ? "لا توجد فصول في هذه الدورة."
+        : "This course has no chapters yet."}
+    </div>
+  ) : null}
 
-            <div className="space-y-3">
-              {chapter.lessons.length === 0 ? (
-                <div className="text-sm text-slate-600">
-                  {safeLocale === "ar" ? "لا توجد دروس في هذا الفصل." : "No lessons in this chapter yet."}
-                </div>
-              ) : null}
+  {course.chapters.map((chapter, chapterIndex) => (
+    <Card key={chapter.id} className="p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h3 className="text-xl font-semibold text-slate-900">
+            {safeLocale === "ar" ? chapter.titleAr : chapter.titleEn}
+          </h3>
 
-              {chapter.lessons.map((lesson) => (
-                <Link href={`/${safeLocale}/dashboard/courses/${course.id}?lessonId=${lesson.id}`} key={lesson.id} className="block">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <h4 className="font-medium text-slate-900">
-                        {safeLocale === "ar" ? lesson.titleAr : lesson.titleEn}
-                      </h4>
-                      {lesson.duration ? (
-                        <span className="text-xs text-slate-500">{lesson.duration}s</span>
-                      ) : null}
-                    </div>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {safeLocale === "ar" ? lesson.descriptionAr || "" : lesson.descriptionEn || ""}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </Card>
-        ))}
+          {activeEnrollment &&
+          (safeLocale === "ar"
+            ? chapter.descriptionAr
+            : chapter.descriptionEn) ? (
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+              {safeLocale === "ar"
+                ? chapter.descriptionAr
+                : chapter.descriptionEn}
+            </p>
+          ) : null}
+        </div>
+
+        <span className="text-sm text-slate-500">
+          {safeLocale === "ar"
+            ? `الفصل ${chapterIndex + 1}`
+            : `Chapter ${chapterIndex + 1}`}
+        </span>
       </div>
+
+      {!activeEnrollment ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm font-medium text-slate-700">
+            {safeLocale === "ar"
+              ? `عدد الدروس: ${chapter.lessons.length}`
+              : `Number of lessons: ${chapter.lessons.length}`}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {chapter.lessons.length === 0 ? (
+            <div className="text-sm text-slate-600">
+              {safeLocale === "ar"
+                ? "لا توجد دروس في هذا الفصل."
+                : "No lessons in this chapter yet."}
+            </div>
+          ) : null}
+
+          {chapter.lessons.map((lesson) => (
+            <Link
+              href={`/${safeLocale}/dashboard/courses/${course.id}?lessonId=${lesson.id}`}
+              key={lesson.id}
+              className="block"
+            >
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h4 className="font-medium text-slate-900">
+                    {safeLocale === "ar"
+                      ? lesson.titleAr
+                      : lesson.titleEn}
+                  </h4>
+
+                  {lesson.duration ? (
+                    <span className="text-xs text-slate-500">
+                      {lesson.duration}s
+                    </span>
+                  ) : null}
+                </div>
+
+                <p className="mt-2 text-sm text-slate-600">
+                  {safeLocale === "ar"
+                    ? lesson.descriptionAr || ""
+                    : lesson.descriptionEn || ""}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </Card>
+  ))}
+</div>
 
       <Card className="p-6 sm:p-8">
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
@@ -174,7 +232,11 @@ export default async function CourseSlugPage({
               {safeLocale === "ar" ? "التسجيل اليدوي بعد التحقق من الدفع" : "Manual enrollment after payment verification"}
             </h2>
           </div>
-          <span className="text-2xl font-bold text-slate-900">{course.price ? `${course.price} SAR` : "Free"}</span>
+          <span className="text-2xl font-bold text-slate-900">{Number(course.price) > 0
+  ? formatCoursePrice(course.price.toString(), safeLocale)
+  : safeLocale === "ar"
+    ? "مجانية"
+    : "Free"}</span>
         </div>
 
         <ol className="mt-6 list-decimal space-y-3 ps-6 leading-7 text-slate-700">

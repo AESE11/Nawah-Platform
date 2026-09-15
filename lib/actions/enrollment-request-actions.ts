@@ -92,7 +92,7 @@ export async function createEnrollmentRequestAction(
         personalPhoneNumber: parsed.data.personalPhoneNumber,
         courseName: `${course.titleAr} / ${course.titleEn}`,
         coursePrice: course.price,
-        currency: "SAR",
+        currency: "EGP",
         receiptUrl: uploadedReceipt.secure_url,
         receiptPublicId: uploadedReceipt.public_id,
       },
