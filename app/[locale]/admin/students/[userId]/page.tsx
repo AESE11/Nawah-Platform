@@ -4,6 +4,7 @@ import { EnrollmentStatusActions } from "@/components/admin/enrollment-status-ac
 import { Card } from "@/components/ui/card";
 import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
+import { getStudentWatermarkId } from "@/lib/watermark";
 
 function getEnrollmentStatus(status: string, arabic: boolean) {
   if (status === "ACTIVE") return arabic ? "نشط" : "Active";
@@ -30,6 +31,13 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
       name: true,
       email: true,
       createdAt: true,
+      enrollmentRequests: {
+        select: {
+          personalPhoneNumber: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
       enrollments: {
         include: { course: true },
         orderBy: { createdAt: "desc" },
@@ -38,17 +46,43 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
   });
 
   if (!student) {
-    return <Card className="p-8 text-slate-600">{arabic ? "الطالب غير موجود." : "Student not found."}</Card>;
+  return <Card className="p-8 text-slate-600">{arabic ? "الطالب غير موجود." : "Student not found."}</Card>;
   }
+
+  const watermarkId = getStudentWatermarkId(student.id);
+  const phoneNumber = student.enrollmentRequests[0]?.personalPhoneNumber ?? "-";
 
   return (
     <div className="space-y-6">
       <AdminBreadcrumbs locale={safeLocale} items={[{ href: "/admin/students", label: arabic ? "الطلاب" : "Students" }, { label: student.name ?? student.email }]} />
       <Card className="p-6">
-        <h1 className="text-3xl font-bold text-slate-900">{student.name ?? student.email}</h1>
-        <p className="mt-2 text-slate-600">{student.email}</p>
-        <p className="mt-3 text-sm text-slate-500">{arabic ? "إنشاء الحساب: " : "Account created: "}{student.createdAt.toLocaleDateString()}</p>
-      </Card>
+  <h1 className="text-3xl font-bold text-slate-900">{student.name ?? student.email}</h1>
+  <p className="mt-2 text-slate-600">{student.email}</p>
+  <p className="mt-3 text-sm text-slate-500">{arabic ? "إنشاء الحساب: " : "Account created: "}{student.createdAt.toLocaleDateString()}</p>
+
+  <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+    <p>
+      <span className="font-semibold text-slate-900">
+        {arabic ? "معرف الطالب: " : "Student ID: "}
+      </span>
+      {student.id}
+    </p>
+
+    <p>
+      <span className="font-semibold text-slate-900">
+        {arabic ? "معرف العلامة المائية: " : "Watermark ID: "}
+      </span>
+      ID-{watermarkId}
+    </p>
+
+    <p>
+      <span className="font-semibold text-slate-900">
+        {arabic ? "رقم الهاتف: " : "Phone: "}
+      </span>
+      {phoneNumber}
+    </p>
+  </div>
+</Card>
 
       <Card className="p-6">
         <h2 className="text-xl font-bold text-slate-900">{arabic ? "الدورات المشترَك فيها" : "Enrolled courses"}</h2>
