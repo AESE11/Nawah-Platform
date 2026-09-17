@@ -35,11 +35,18 @@ function getGoogleSheetsConfig() {
     );
   }
 
-  return {
-    email,
-    privateKey: privateKey.replace(/\\n/g, "\n"),
-    spreadsheetId,
-  };
+  const normalizedPrivateKey = privateKey
+  .replace(/^"/, "")
+  .replace(/"$/, "")
+  .replace(/\\n/g, "\n")
+  .replace(/\r\n/g, "\n")
+  .trim();
+
+return {
+  email,
+  privateKey: normalizedPrivateKey,
+  spreadsheetId,
+};
 }
 
 function toGoogleSheetValue(value: unknown): string | number | boolean {
