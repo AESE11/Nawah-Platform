@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExportButtons } from "@/components/admin/export-buttons";
 import { Card } from "@/components/ui/card";
 import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { isLocale } from "@/lib/locale";
@@ -58,6 +59,18 @@ export default async function AdminEnrollmentRequestsPage({
           </Link>
         ))}
       </div>
+
+            <ExportButtons
+        endpoint={`/${safeLocale}/api/admin/exports/enrollment-requests?status=${status}`}
+        googleSheetsEndpoint={`/${safeLocale}/api/admin/exports/enrollment-requests/google-sheets?status=${status}`}
+        labels={{
+          excel: arabic ? "تصدير Excel" : "Export Excel",
+          csv: arabic ? "تصدير CSV" : "Export CSV",
+          googleSheets: arabic
+            ? "تصدير إلى Google Sheets"
+            : "Export to Google Sheets",
+        }}
+      />
 
       {requests.length === 0 ? (
         <Card className="p-8 text-slate-600">{arabic ? "لا توجد طلبات في هذه الحالة." : "No requests found for this status."}</Card>

@@ -42,12 +42,16 @@ export default async function AdminStudentsPage({ params }: { params: Promise<{ 
 
         <div className="mt-4">
           <ExportButtons
-            endpoint={`/${safeLocale}/api/admin/exports/students`}
-            labels={{
-              excel: arabic ? "تصدير Excel" : "Export Excel",
-              csv: arabic ? "تصدير CSV" : "Export CSV",
-            }}
-          />
+  endpoint={`/${safeLocale}/api/admin/exports/students`}
+  googleSheetsEndpoint={`/${safeLocale}/api/admin/exports/students/google-sheets`}
+  labels={{
+    excel: arabic ? "تصدير Excel" : "Export Excel",
+    csv: arabic ? "تصدير CSV" : "Export CSV",
+    googleSheets: arabic
+      ? "تصدير إلى Google Sheets"
+      : "Export to Google Sheets",
+  }}
+/>
         </div>
       </div>
 

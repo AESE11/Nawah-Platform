@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ExportButtons } from "@/components/admin/export-buttons";
 import { createManualEnrollmentAction } from "@/lib/actions/payment-actions";
 import { getAdminEnrollments, getAdminCourses, getAdminUsers } from "@/lib/services/admin-service";
 import { isLocale } from "@/lib/locale";
@@ -47,6 +48,19 @@ export default async function AdminEnrollmentsPage({ params }: { params: Promise
           </Button>
         </form>
       </Card>
+
+      <ExportButtons
+  endpoint={`/${safeLocale}/api/admin/exports/enrollments`}
+  googleSheetsEndpoint={`/${safeLocale}/api/admin/exports/enrollments/google-sheets`}
+  labels={{
+    excel: safeLocale === "ar" ? "تصدير Excel" : "Export Excel",
+    csv: safeLocale === "ar" ? "تصدير CSV" : "Export CSV",
+    googleSheets:
+      safeLocale === "ar"
+        ? "تصدير إلى Google Sheets"
+        : "Export to Google Sheets",
+  }}
+/>
 
       <div className="space-y-4">
         {enrollments.map((enrollment) => (
