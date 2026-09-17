@@ -217,7 +217,42 @@ export async function deleteCourseAction(formData: FormData, locale: string) {
 
   const id = normalizeText(formData.get("courseId"));
 
-  await prisma.course.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.payment.deleteMany({
+      where: { courseId: id },
+    });
+
+    await tx.enrollmentRequest.deleteMany({
+      where: { courseId: id },
+    });
+
+    await tx.enrollment.deleteMany({
+      where: { courseId: id },
+    });
+
+    const chapters = await tx.chapter.findMany({
+      where: { courseId: id },
+      select: { id: true },
+    });
+
+    if (chapters.length > 0) {
+      await tx.lesson.deleteMany({
+        where: {
+          chapterId: {
+            in: chapters.map((chapter) => chapter.id),
+          },
+        },
+      });
+    }
+
+    await tx.chapter.deleteMany({
+      where: { courseId: id },
+    });
+
+    await tx.course.delete({
+      where: { id },
+    });
+  });
 
   revalidatePath(`/${locale}/admin/courses`);
   revalidatePath(`/${locale}/admin`);
