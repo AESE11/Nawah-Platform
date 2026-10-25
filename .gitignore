@@ -46,3 +46,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local Android IDE files
+android/.idea/
+android/**/.idea/
+android/gradle/gradle-daemon-jvm.properties
+
+# Local test files - do not upload
+test-receipt.jpg
+vcdn-encryption-test.mp4
+vcdn-encryption-test.zip
+vcdn-master-test.txt
+vcdn-test.m3u8
+vcdn-variant-test.txt
+
+# Environment secrets
+.env
+.env.*
+!.env.example

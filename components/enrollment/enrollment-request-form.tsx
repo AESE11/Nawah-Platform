@@ -49,9 +49,27 @@ export function EnrollmentRequestForm({ courseId, courseName, email, locale }: E
       </div>
       <div className="space-y-2 md:col-span-2">
         <Label htmlFor="receipt">{isArabic ? "صورة إيصال التحويل" : "Payment receipt image"}</Label>
-        <Input id="receipt" name="receipt" type="file" accept="image/jpeg,image/png,image/webp" required />
+        <Input
+  id="receipt"
+  name="receipt"
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  required
+  onChange={(event) => {
+    const file = event.target.files?.[0];
+
+    if (file && file.size > 2 * 1024 * 1024) {
+      event.target.value = "";
+      window.alert(
+        isArabic
+          ? "حجم صورة الإيصال يجب ألا يتجاوز 2 ميجابايت."
+          : "Receipt image must not exceed 2 MB.",
+      );
+    }
+  }}
+/>
         <p className="text-xs text-slate-500">
-          {isArabic ? "صورة JPG أو PNG أو WEBP، بحد أقصى 5 ميجابايت." : "JPG, PNG, or WEBP image, maximum 5 MB."}
+          {isArabic ? "صورة JPG أو PNG أو WEBP، بحد أقصى 2 ميجابايت." : "JPG, PNG, or WEBP image, maximum 2 MB."}
         </p>
       </div>
       {state.message ? (

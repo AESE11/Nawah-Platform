@@ -33,8 +33,8 @@ export async function validateEnrollmentReceiptFile(file: File) {
     throw new Error("Receipt must be a JPG, PNG, or WEBP image.");
   }
 
-  if (file.size <= 0 || file.size > 5 * 1024 * 1024) {
-    throw new Error("Receipt image must be between 1 byte and 5MB.");
+  if (file.size <= 0 || file.size > 2 * 1024 * 1024) {
+  throw new Error("Receipt image must be between 1 byte and 2MB.");
   }
 
   const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());

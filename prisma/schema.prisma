@@ -8,54 +8,22 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  STUDENT
-  ADMIN
-}
-
-enum CourseStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
-
-enum PaymentStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
-}
-
-enum EnrollmentStatus {
-  PENDING
-  ACTIVE
-  SUSPENDED
-  CANCELLED
-  COMPLETED
-}
-
-enum EnrollmentRequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 model User {
-  id               String       @id @default(cuid())
-  name             String?
-  email            String       @unique
-  emailVerified    DateTime?
-  image            String?
-  passwordHash     String
-  role             Role         @default(STUDENT)
-  accounts         Account[]
-  sessions         Session[]
-  payments         Payment[]
-  reviewedPayments Payment[]    @relation("ReviewedPayments")
-  enrollments      Enrollment[]
+  id                 String              @id @default(cuid())
+  name               String?
+  email              String              @unique
+  emailVerified      DateTime?
+  image              String?
+  passwordHash       String
+  role               Role                @default(STUDENT)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  accounts           Account[]
+  enrollments        Enrollment[]
   enrollmentRequests EnrollmentRequest[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  reviewedPayments   Payment[]           @relation("ReviewedPayments")
+  payments           Payment[]
+  sessions           Session[]
 }
 
 model Account {
@@ -109,33 +77,33 @@ model Category {
 }
 
 model Course {
-  id                 String       @id @default(cuid())
+  id                 String              @id @default(cuid())
   titleAr            String
   titleEn            String
-  slug               String       @unique
+  slug               String              @unique
   shortDescriptionAr String?
   shortDescriptionEn String?
   descriptionAr      String?
   descriptionEn      String?
+  price              Decimal             @db.Decimal(10, 2)
+  thumbnailUrl       String?
+  thumbnailPublicId  String?
+  status             CourseStatus        @default(DRAFT)
+  featured           Boolean             @default(false)
+  categoryId         String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  benefitsAr         String?
+  benefitsEn         String?
   featuresAr         String?
   featuresEn         String?
   outcomesAr         String?
   outcomesEn         String?
-  benefitsAr         String?
-  benefitsEn         String?
-  price              Decimal      @db.Decimal(10, 2)
-  thumbnailUrl       String?
-  thumbnailPublicId  String?
-  status             CourseStatus @default(DRAFT)
-  featured           Boolean      @default(false)
-  categoryId         String
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  category           Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   chapters           Chapter[]
-  payments           Payment[]
+  category           Category            @relation(fields: [categoryId], references: [id])
   enrollments        Enrollment[]
   enrollmentRequests EnrollmentRequest[]
+  payments           Payment[]
 
   @@index([categoryId])
   @@index([status])
@@ -169,6 +137,7 @@ model Lesson {
   chapterId     String
   muxAssetId    String?
   muxPlaybackId String?
+    vcdnVideoId   String?
   duration      Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -197,13 +166,13 @@ model PaymentMethod {
 }
 
 model Payment {
-  id                   String        @id @default(cuid())
+  id                   String             @id @default(cuid())
   userId               String
   courseId             String
-  amount               Decimal       @db.Decimal(10, 2)
-  currency             String        @default("EGP")
+  amount               Decimal            @db.Decimal(10, 2)
+  currency             String             @default("EGP")
   paymentMethodId      String
-  status               PaymentStatus @default(PENDING)
+  status               PaymentStatus      @default(PENDING)
   transactionReference String?
   proofUrl             String?
   proofPublicId        String?
@@ -211,13 +180,13 @@ model Payment {
   adminNotes           String?
   reviewedBy           String?
   reviewedAt           DateTime?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course               Course        @relation(fields: [courseId], references: [id], onDelete: Restrict)
-  paymentMethod        PaymentMethod @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict)
-  reviewedUser         User?         @relation("ReviewedPayments", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
   enrollmentRequest    EnrollmentRequest?
+  course               Course             @relation(fields: [courseId], references: [id])
+  paymentMethod        PaymentMethod      @relation(fields: [paymentMethodId], references: [id])
+  reviewedUser         User?              @relation("ReviewedPayments", fields: [reviewedBy], references: [id])
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
   @@index([courseId, status])
@@ -234,8 +203,8 @@ model Enrollment {
   expiresAt  DateTime?
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
+  course     Course           @relation(fields: [courseId], references: [id])
   user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course           @relation(fields: [courseId], references: [id], onDelete: Restrict)
 
   @@unique([userId, courseId])
   @@index([userId, status])
@@ -244,30 +213,62 @@ model Enrollment {
 }
 
 model EnrollmentRequest {
-  id                    String                 @id @default(cuid())
-  userId                String
-  courseId              String
-  paymentId             String?                @unique
-  fullName              String
-  email                 String
-  transferWalletNumber  String
-  personalPhoneNumber   String
-  courseName            String
-  coursePrice           Decimal                @db.Decimal(10, 2)
-  currency              String                 @default("EGP")
-  receiptUrl            String
-  receiptPublicId       String?
-  status                EnrollmentRequestStatus @default(PENDING)
-  adminNotes            String?
-  reviewedBy            String?
-  reviewedAt            DateTime?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course                Course                 @relation(fields: [courseId], references: [id], onDelete: Restrict)
-  payment               Payment?               @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  id                   String                  @id @default(cuid())
+  userId               String
+  courseId             String
+  fullName             String
+  email                String
+  transferWalletNumber String
+  personalPhoneNumber  String
+  courseName           String
+  coursePrice          Decimal                 @db.Decimal(10, 2)
+  currency             String                  @default("EGP")
+  receiptUrl           String
+  receiptPublicId      String?
+  status               EnrollmentRequestStatus @default(PENDING)
+  adminNotes           String?
+  reviewedBy           String?
+  reviewedAt           DateTime?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  paymentId            String?                 @unique
+  course               Course                  @relation(fields: [courseId], references: [id])
+  payment              Payment?                @relation(fields: [paymentId], references: [id])
+  user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
   @@index([courseId, status])
   @@index([status, createdAt])
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum EnrollmentStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  COMPLETED
+}
+
+enum EnrollmentRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

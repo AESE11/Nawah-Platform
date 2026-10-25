@@ -229,6 +229,12 @@ export default async function AdminCourseDetailPage({
                 <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الدرس بالإنجليزية" : "English lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <input name="muxAssetId" placeholder={safeLocale === "ar" ? "Mux Asset ID" : "Mux Asset ID"} maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <input name="muxPlaybackId" placeholder={safeLocale === "ar" ? "Mux Playback ID" : "Mux Playback ID"} maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <input
+  name="vcdnVideoId"
+  placeholder="VCDN Video ID"
+  maxLength={contentLimits.mediaIdentifier}
+  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800"
+/>
                 <input name="duration" type="number" min="0" placeholder={safeLocale === "ar" ? "المدة (ثانية)" : "Duration (seconds)"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <Button type="submit" size="sm">{safeLocale === "ar" ? "إضافة درس" : "Add lesson"}</Button>
               </form>
@@ -282,6 +288,13 @@ export default async function AdminCourseDetailPage({
                       <textarea name="descriptionEn" defaultValue={lesson.descriptionEn ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <input name="muxAssetId" defaultValue={lesson.muxAssetId ?? ""} placeholder="Mux Asset ID" maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <input name="muxPlaybackId" defaultValue={lesson.muxPlaybackId ?? ""} placeholder="Mux Playback ID" maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <input
+  name="vcdnVideoId"
+  defaultValue={lesson.vcdnVideoId ?? ""}
+  placeholder="VCDN Video ID"
+  maxLength={contentLimits.mediaIdentifier}
+  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800"
+/>
                       <input name="duration" type="number" min="0" defaultValue={lesson.duration ?? ""} placeholder={safeLocale === "ar" ? "المدة (ثانية)" : "Duration (seconds)"} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <input type="hidden" name="order" value={lesson.order} />
                       <Button type="submit" size="sm">{safeLocale === "ar" ? "حفظ الدرس" : "Save lesson"}</Button>

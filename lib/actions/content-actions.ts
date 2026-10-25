@@ -386,6 +386,7 @@ export async function createLessonAction(formData: FormData, locale: string) {
     chapterId,
     muxAssetId: normalizeText(formData.get("muxAssetId")),
     muxPlaybackId: normalizeText(formData.get("muxPlaybackId")),
+    vcdnVideoId: normalizeText(formData.get("vcdnVideoId")),
     duration: normalizeText(formData.get("duration")) || "0",
   };
 
@@ -405,6 +406,7 @@ export async function createLessonAction(formData: FormData, locale: string) {
       descriptionEn: parsed.descriptionEn || null,
       muxAssetId: parsed.muxAssetId || null,
       muxPlaybackId: parsed.muxPlaybackId || null,
+      vcdnVideoId: parsed.vcdnVideoId || null,
       duration: parsed.duration ? Number(parsed.duration) : null,
     },
   });
@@ -430,6 +432,7 @@ export async function updateLessonAction(formData: FormData, locale: string) {
     chapterId,
     muxAssetId: normalizeText(formData.get("muxAssetId")),
     muxPlaybackId: normalizeText(formData.get("muxPlaybackId")),
+    vcdnVideoId: normalizeText(formData.get("vcdnVideoId")),
     duration: normalizeText(formData.get("duration")) || "0",
   };
 
@@ -443,6 +446,7 @@ export async function updateLessonAction(formData: FormData, locale: string) {
       descriptionEn: parsed.descriptionEn || null,
       muxAssetId: parsed.muxAssetId || null,
       muxPlaybackId: parsed.muxPlaybackId || null,
+      vcdnVideoId: parsed.vcdnVideoId || null,
       duration: parsed.duration ? Number(parsed.duration) : null,
       order: Number(parsed.order),
     },
