@@ -127,6 +127,7 @@ model Chapter {
   @@index([courseId, order])
 }
 
+
 model Lesson {
   id            String   @id @default(cuid())
   titleAr       String
@@ -135,18 +136,15 @@ model Lesson {
   descriptionEn String?
   order         Int      @default(0)
   chapterId     String
-  muxAssetId    String?
-  muxPlaybackId String?
-    vcdnVideoId   String?
+  vcdnVideoId   String?
   duration      Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   chapter       Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@index([chapterId, order])
-  @@index([muxAssetId])
-  @@index([muxPlaybackId])
 }
+
 
 model PaymentMethod {
   id               String    @id @default(cuid())

@@ -38,7 +38,7 @@ yarn-error.log*
 .env.production.local
 
 # prisma
-/prisma/migrations
+
 
 # vercel
 .vercel

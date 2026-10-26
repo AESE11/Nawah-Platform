@@ -16,8 +16,6 @@ export interface LessonRecord {
   descriptionAr?: string | null;
   descriptionEn?: string | null;
   order: number;
-  muxAssetId?: string | null;
-  muxPlaybackId?: string | null;
   duration?: number | null;
 }
 

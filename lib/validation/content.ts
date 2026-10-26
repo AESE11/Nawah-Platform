@@ -63,8 +63,6 @@ export const lessonSchema = z.object({
   descriptionEn: z.string().trim().max(contentLimits.lessonDescription).optional().or(z.literal("")),
   order: z.coerce.number().int().min(0),
   chapterId: z.string().trim().min(1, "Chapter is required."),
-  muxAssetId: z.string().trim().max(contentLimits.mediaIdentifier).optional().or(z.literal("")),
-  muxPlaybackId: z.string().trim().max(contentLimits.mediaIdentifier).optional().or(z.literal("")),
   vcdnVideoId: z.string().trim().max(contentLimits.mediaIdentifier).optional().or(z.literal("")),
   duration: z.coerce.number().int().min(0).optional().or(z.literal("")),
 });

@@ -1,12 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { evaluateLessonAccess } from "../services/video-access";
-import { getMuxPlaybackTokenLifetimeMs, normalizePlaybackId } from "../lib/mux";
 
-const projectRoot = join(process.cwd());
+
 
 test("unauthenticated user cannot obtain lesson access", () => {
   const result = evaluateLessonAccess({
@@ -125,20 +123,4 @@ test("nonexistent lesson does not authorize access", () => {
 
   assert.equal(result.status, 404);
   assert.equal(result.authorized, false);
-});
-
-test("mux playback ttl parsing is stable and valid ids are normalized", () => {
-  assert.equal(getMuxPlaybackTokenLifetimeMs("30m"), 30 * 60 * 1000);
-  assert.equal(normalizePlaybackId("abc_123-XYZ"), "abc_123-XYZ");
-
-  assert.throws(() => normalizePlaybackId(""), /valid Mux playback ID/i);
-  assert.throws(() => normalizePlaybackId("bad id"), /valid Mux playback ID/i);
-});
-
-test("mux signing material stays server-side and never appears in client code", () => {
-  const clientSource = readFileSync(join(projectRoot, "components/video/mux-video-player.tsx"), "utf8");
-  const serverSource = readFileSync(join(projectRoot, "lib/mux.ts"), "utf8");
-
-  assert.doesNotMatch(clientSource, /MUX_SIGNING_KEY|MUX_PRIVATE_KEY|NEXT_PUBLIC_MUX_/i);
-  assert.match(serverSource, /MUX_SIGNING_KEY|MUX_PRIVATE_KEY/i);
 });

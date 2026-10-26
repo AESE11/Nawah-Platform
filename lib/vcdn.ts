@@ -1,5 +1,4 @@
-const VCDN_BASE_URL =
-  process.env.VCDN_BASE_URL ?? "https://cdn.vcdn.me";
+
 
 const VCDN_EMBED_BASE_URL =
   "https://embed.vcdn.me";

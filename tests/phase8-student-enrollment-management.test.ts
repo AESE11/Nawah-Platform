@@ -9,7 +9,15 @@ const projectRoot = join(process.cwd());
 const managementActions = readFileSync(join(projectRoot, "lib/actions/enrollment-management-actions.ts"), "utf8");
 const studentsPage = readFileSync(join(projectRoot, "app/[locale]/admin/students/page.tsx"), "utf8");
 const studentDetailsPage = readFileSync(join(projectRoot, "app/[locale]/admin/students/[userId]/page.tsx"), "utf8");
-const tokenRoute = readFileSync(join(projectRoot, "app/[locale]/api/video/[lessonId]/token/route.ts"), "utf8");
+const tokenRoute = readFileSync(
+  join(projectRoot, "app/[locale]/api/video/[lessonId]/token/route.ts"),
+  "utf8",
+);
+
+const mobilePlaybackRoute = readFileSync(
+  join(projectRoot, "app/api/mobile/lessons/[lessonId]/playback/route.ts"),
+  "utf8",
+);
 const coursePlayerPage = readFileSync(join(projectRoot, "app/[locale]/dashboard/courses/[courseId]/page.tsx"), "utf8");
 const schema = readFileSync(join(projectRoot, "prisma/schema.prisma"), "utf8");
 
@@ -34,7 +42,9 @@ test("student management surfaces are scoped to students and safe fields", () =>
 
 test("protected course and token paths require active enrollment", () => {
   assert.match(coursePlayerPage, /getActiveEnrollmentForCourse/);
-  assert.match(tokenRoute, /getActiveEnrollmentForCourse/);
+  assert.match(mobilePlaybackRoute, /getActiveEnrollmentForCourse/);
+  assert.match(tokenRoute, /APP_ONLY_PLAYBACK/);
+  assert.match(tokenRoute, /status: 403/);
   assert.match(schema, /SUSPENDED/);
   assert.match(schema, /@@unique\(\[userId, courseId\]\)/);
 });

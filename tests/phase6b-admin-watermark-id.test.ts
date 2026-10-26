@@ -21,8 +21,26 @@ test("admin student detail uses the exact protected-video watermark helper", () 
 
   assert.equal(getStudentWatermarkId(userId), expected);
   assert.match(adminStudentPage, /getStudentWatermarkId\(student\.id\)/);
-  assert.match(protectedPlayerPage, /getStudentWatermarkId\(session\.user\.id\)/);
-  assert.match(adminStudentPage, /ID-\$\{getStudentWatermarkId\(student\.id\)\}/);
+  assert.match(
+  protectedPlayerPage,
+  /Lesson playback is available through the Android app only/,
+);
+
+const mobilePlaybackRoute = readFileSync(
+  join(
+    projectRoot,
+    "app/api/mobile/lessons/[lessonId]/playback/route.ts",
+  ),
+  "utf8",
+);
+
+assert.match(
+  mobilePlaybackRoute,
+  /getStudentWatermarkId\(auth\.userId\)/,
+);
+
+assert.match(adminStudentPage, /getStudentWatermarkId\(student\.id\)/);
+assert.match(adminStudentPage, /watermarkId=\{`ID-\$\{watermarkId\}`\}/);
 });
 
 test("watermark identifier and copy control are limited to the admin student detail UI", () => {

@@ -227,8 +227,6 @@ export default async function AdminCourseDetailPage({
                 <input type="hidden" name="chapterId" value={chapter.id} />
                 <input name="titleAr" placeholder={safeLocale === "ar" ? "عنوان الدرس بالعربية" : "Arabic lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الدرس بالإنجليزية" : "English lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
-                <input name="muxAssetId" placeholder={safeLocale === "ar" ? "Mux Asset ID" : "Mux Asset ID"} maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
-                <input name="muxPlaybackId" placeholder={safeLocale === "ar" ? "Mux Playback ID" : "Mux Playback ID"} maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <input
   name="vcdnVideoId"
   placeholder="VCDN Video ID"
@@ -286,8 +284,6 @@ export default async function AdminCourseDetailPage({
                       <input name="titleEn" defaultValue={lesson.titleEn} required maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <textarea name="descriptionAr" defaultValue={lesson.descriptionAr ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <textarea name="descriptionEn" defaultValue={lesson.descriptionEn ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
-                      <input name="muxAssetId" defaultValue={lesson.muxAssetId ?? ""} placeholder="Mux Asset ID" maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
-                      <input name="muxPlaybackId" defaultValue={lesson.muxPlaybackId ?? ""} placeholder="Mux Playback ID" maxLength={contentLimits.mediaIdentifier} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <input
   name="vcdnVideoId"
   defaultValue={lesson.vcdnVideoId ?? ""}

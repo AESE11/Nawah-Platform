@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getActiveEnrollmentForCourse } from "@/lib/services/enrollment-service";
-import { generateMuxPlaybackToken, getMuxPlaybackTokenLifetimeMs, normalizeMuxPlaybackTokenTtl, normalizePlaybackId } from "@/lib/mux";
 
 export interface LessonAccessEvaluationInput {
   userId?: string | null;
@@ -97,8 +96,8 @@ export async function canAccessLesson(userId: string, lessonId: string) {
     lessonExists: true,
     enrollmentStatus: activeEnrollment?.status ?? null,
     hasActiveEnrollment: Boolean(activeEnrollment),
-    hasPlaybackId: Boolean(lesson.muxPlaybackId),
-    playbackId: lesson.muxPlaybackId,
+    hasPlaybackId: Boolean(lesson.vcdnVideoId),
+    playbackId: lesson.vcdnVideoId,
   });
 }
 
@@ -128,57 +127,7 @@ export async function canAccessLessonForCourse(userId: string, courseId: string,
     lessonExists: true,
     enrollmentStatus: activeEnrollment?.status ?? null,
     hasActiveEnrollment: Boolean(activeEnrollment),
-    hasPlaybackId: Boolean(lesson.muxPlaybackId),
-    playbackId: lesson.muxPlaybackId,
+    hasPlaybackId: Boolean(lesson.vcdnVideoId),
+    playbackId: lesson.vcdnVideoId,
   });
-}
-
-export interface VideoAccessRequest {
-  playbackId: string;
-  courseId?: string;
-  lessonId?: string;
-  expiration?: string;
-}
-
-export interface AuthorizedPlaybackToken {
-  playbackId: string;
-  token: string;
-  expiresAt: string;
-  issuedForUserId: string;
-}
-
-export async function getAuthorizedPlaybackToken({
-  playbackId,
-  courseId,
-  lessonId,
-  expiration,
-}: VideoAccessRequest): Promise<AuthorizedPlaybackToken> {
-  const user = await getCurrentUser();
-
-  if (!user?.id) {
-    throw new Error("Authentication is required to access protected video content.");
-  }
-
-  const normalizedPlaybackId = normalizePlaybackId(playbackId);
-
-  if (lessonId) {
-    const authorization = await canAccessLessonForCourse(user.id, courseId || "", lessonId);
-
-    if (!authorization.authorized) {
-      throw new Error(authorization.reason);
-    }
-  }
-
-  const finalExpiration = normalizeMuxPlaybackTokenTtl(expiration);
-
-  const token = await generateMuxPlaybackToken(normalizedPlaybackId, {
-    expiration: finalExpiration,
-  });
-
-  return {
-    playbackId: normalizedPlaybackId,
-    token,
-    expiresAt: new Date(Date.now() + getMuxPlaybackTokenLifetimeMs(finalExpiration)).toISOString(),
-    issuedForUserId: String(user.id),
-  };
 }

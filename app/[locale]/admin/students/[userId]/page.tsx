@@ -1,6 +1,8 @@
+
 import Link from "next/link";
 import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { EnrollmentStatusActions } from "@/components/admin/enrollment-status-actions";
+import { WatermarkIdCopy } from "@/components/admin/watermark-id-copy";
 import { Card } from "@/components/ui/card";
 import { isLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
@@ -20,10 +22,15 @@ function getStatusClass(status: string) {
   return "bg-slate-100 text-slate-700";
 }
 
-export default async function AdminStudentDetailPage({ params }: { params: Promise<{ locale: string; userId: string }> }) {
+export default async function AdminStudentDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; userId: string }>;
+}) {
   const { locale, userId } = await params;
   const safeLocale = isLocale(locale) ? locale : "ar";
   const arabic = safeLocale === "ar";
+
   const student = await prisma.user.findFirst({
     where: { id: userId, role: "STUDENT" },
     select: {
@@ -46,74 +53,138 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
   });
 
   if (!student) {
-  return <Card className="p-8 text-slate-600">{arabic ? "الطالب غير موجود." : "Student not found."}</Card>;
+    return (
+      <Card className="p-8 text-slate-600">
+        {arabic ? "الطالب غير موجود." : "Student not found."}
+      </Card>
+    );
   }
 
   const watermarkId = getStudentWatermarkId(student.id);
-  const phoneNumber = student.enrollmentRequests[0]?.personalPhoneNumber ?? "-";
+  const phoneNumber =
+    student.enrollmentRequests[0]?.personalPhoneNumber ?? "-";
 
   return (
     <div className="space-y-6">
-      <AdminBreadcrumbs locale={safeLocale} items={[{ href: "/admin/students", label: arabic ? "الطلاب" : "Students" }, { label: student.name ?? student.email }]} />
-      <Card className="p-6">
-  <h1 className="text-3xl font-bold text-slate-900">{student.name ?? student.email}</h1>
-  <p className="mt-2 text-slate-600">{student.email}</p>
-  <p className="mt-3 text-sm text-slate-500">{arabic ? "إنشاء الحساب: " : "Account created: "}{student.createdAt.toLocaleDateString()}</p>
-
-  <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-    <p>
-      <span className="font-semibold text-slate-900">
-        {arabic ? "معرف الطالب: " : "Student ID: "}
-      </span>
-      {student.id}
-    </p>
-
-    <p>
-      <span className="font-semibold text-slate-900">
-        {arabic ? "معرف العلامة المائية: " : "Watermark ID: "}
-      </span>
-      ID-{watermarkId}
-    </p>
-
-    <p>
-      <span className="font-semibold text-slate-900">
-        {arabic ? "رقم الهاتف: " : "Phone: "}
-      </span>
-      {phoneNumber}
-    </p>
-  </div>
-</Card>
+      <AdminBreadcrumbs
+        locale={safeLocale}
+        items={[
+          {
+            href: "/admin/students",
+            label: arabic ? "الطلاب" : "Students",
+          },
+          { label: student.name ?? student.email },
+        ]}
+      />
 
       <Card className="p-6">
-        <h2 className="text-xl font-bold text-slate-900">{arabic ? "الدورات المشترَك فيها" : "Enrolled courses"}</h2>
+        <h1 className="text-3xl font-bold text-slate-900">
+          {student.name ?? student.email}
+        </h1>
+
+        <p className="mt-2 text-slate-600">{student.email}</p>
+
+        <p className="mt-3 text-sm text-slate-500">
+          {arabic ? "إنشاء الحساب: " : "Account created: "}
+          {student.createdAt.toLocaleDateString()}
+        </p>
+
+        <div className="mt-4 grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
+          <p>
+            <span className="font-semibold text-slate-900">
+              {arabic ? "معرّف الطالب: " : "Student ID: "}
+            </span>
+            {student.id}
+          </p>
+
+          <div>
+            <p className="mb-2 font-semibold text-slate-900">
+              {arabic ? "معرّف العلامة المائية:" : "Watermark ID:"}
+            </p>
+
+            <WatermarkIdCopy
+              watermarkId={`ID-${watermarkId}`}
+              copyLabel={arabic ? "نسخ" : "Copy"}
+              copiedLabel={arabic ? "تم النسخ" : "Copied"}
+              copyFailedLabel={arabic ? "تعذر النسخ" : "Copy failed"}
+            />
+          </div>
+
+          <p>
+            <span className="font-semibold text-slate-900">
+              {arabic ? "رقم الهاتف: " : "Phone: "}
+            </span>
+            {phoneNumber}
+          </p>
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-xl font-bold text-slate-900">
+          {arabic ? "الدورات المشترَك فيها" : "Enrolled courses"}
+        </h2>
+
         {student.enrollments.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-600">{arabic ? "لا توجد اشتراكات." : "No enrollments found."}</p>
+          <p className="mt-4 text-sm text-slate-600">
+            {arabic ? "لا توجد اشتراكات." : "No enrollments found."}
+          </p>
         ) : (
           <div className="mt-4 space-y-4">
             {student.enrollments.map((enrollment) => (
-              <div key={enrollment.id} className="rounded-xl border border-slate-200 p-4">
+              <div
+                key={enrollment.id}
+                className="rounded-xl border border-slate-200 p-4"
+              >
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <h3 className="font-semibold text-slate-900">{arabic ? enrollment.course.titleAr : enrollment.course.titleEn}</h3>
+                    <h3 className="font-semibold text-slate-900">
+                      {arabic
+                        ? enrollment.course.titleAr
+                        : enrollment.course.titleEn}
+                    </h3>
+
                     <div className="mt-2 grid gap-2 text-sm text-slate-600 sm:grid-cols-3">
-                      <span>{arabic ? "الحالة: " : "Status: "}{getEnrollmentStatus(enrollment.status, arabic)}</span>
-                      <span>{arabic ? "تاريخ الاشتراك: " : "Enrolled: "}{enrollment.enrolledAt?.toLocaleDateString() ?? "-"}</span>
-                      <span>{arabic ? "آخر تحديث: " : "Updated: "}{enrollment.updatedAt.toLocaleDateString()}</span>
+                      <span>
+                        {arabic ? "الحالة: " : "Status: "}
+                        {getEnrollmentStatus(enrollment.status, arabic)}
+                      </span>
+
+                      <span>
+                        {arabic ? "تاريخ الاشتراك: " : "Enrolled: "}
+                        {enrollment.enrolledAt?.toLocaleDateString() ?? "-"}
+                      </span>
+
+                      <span>
+                        {arabic ? "آخر تحديث: " : "Updated: "}
+                        {enrollment.updatedAt.toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusClass(enrollment.status)}`}>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusClass(enrollment.status)}`}
+                  >
                     {getEnrollmentStatus(enrollment.status, arabic)}
                   </span>
                 </div>
+
                 <div className="mt-4">
-                  <EnrollmentStatusActions enrollmentId={enrollment.id} status={enrollment.status} locale={safeLocale} />
+                  <EnrollmentStatusActions
+                    enrollmentId={enrollment.id}
+                    status={enrollment.status}
+                    locale={safeLocale}
+                  />
                 </div>
               </div>
             ))}
           </div>
         )}
       </Card>
-      <Link href={`/${safeLocale}/admin/students`} className="text-sm font-medium text-teal-700 hover:text-teal-900">
+
+      <Link
+        href={`/${safeLocale}/admin/students`}
+        className="text-sm font-medium text-teal-700 hover:text-teal-900"
+      >
         {arabic ? "العودة إلى الطلاب" : "Back to students"}
       </Link>
     </div>
