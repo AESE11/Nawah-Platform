@@ -58,4 +58,16 @@ class AuthRepository(
     fun logout() {
         TokenStorage.clearToken(context)
     }
+
+
+    suspend fun requestPasswordReset(email: String): Result<String> {
+        return try {
+            val message = AuthApi.requestPasswordReset(email)
+            Result.success(message)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 }

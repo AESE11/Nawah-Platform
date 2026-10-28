@@ -41,6 +41,8 @@ import com.aese11.arabiccourseplatform.ui.home.HomeScreen
 import com.aese11.arabiccourseplatform.ui.profile.ProfileScreen
 import com.aese11.arabiccourseplatform.ui.theme.ArabicCoursePlatformTheme
 import com.aese11.arabiccourseplatform.ui.video.VideoPlayerScreen
+import com.aese11.arabiccourseplatform.ui.auth.ForgotPasswordScreen
+
 
 private val MainTabScreens = setOf(
     "home",
@@ -120,7 +122,7 @@ class MainActivity : ComponentActivity() {
                             backFromCourse()
                         }
 
-                        "register" -> {
+                        "register", "forgot_password" -> {
                             currentScreen = "login"
                         }
 
@@ -203,6 +205,17 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onRegisterClick = {
                                         currentScreen = "register"
+                                    },
+                                    onForgotPasswordClick = {
+                                        currentScreen = "forgot_password"
+                                    }
+                                )
+                            }
+
+                            "forgot_password" -> {
+                                ForgotPasswordScreen(
+                                    onBackToLogin = {
+                                        currentScreen = "login"
                                     }
                                 )
                             }

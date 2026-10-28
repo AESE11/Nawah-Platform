@@ -48,7 +48,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -181,6 +182,19 @@ fun LoginScreen(
                         ),
                         shape = RoundedCornerShape(14.dp)
                     )
+
+
+                    TextButton(
+                        onClick = onForgotPasswordClick,
+                        enabled = !loading,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "نسيت كلمة المرور؟",
+                            textAlign = TextAlign.End
+                        )
+                    }
+
 
                     if (errorMessage != null) {
                         Spacer(modifier = Modifier.height(12.dp))

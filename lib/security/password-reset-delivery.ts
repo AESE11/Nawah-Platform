@@ -20,6 +20,7 @@ export function createPasswordResetDeliveryTask(
 ): () => Promise<void> {
   return async () => {
     let tokenHash: string | undefined;
+    let stage = "initialization";
 
     try {
       const baseUrl = dependencies.baseUrl?.trim();
@@ -48,16 +49,18 @@ export function createPasswordResetDeliveryTask(
       resetUrl.searchParams.set("token", resetToken.token);
       tokenHash = resetToken.tokenHash;
 
+      stage = "persist-token";
       await dependencies.persistToken(
         user.id,
         resetToken.tokenHash,
         resetToken.expiresAt,
       );
-      await dependencies.sendEmail({
+
+      stage = "send-email";await dependencies.sendEmail({
         to: user.email,
         resetUrl: resetUrl.toString(),
       });
-    } catch {
+    } catch (error) {
       if (tokenHash) {
         try {
           await dependencies.deleteToken(tokenHash);
@@ -66,7 +69,12 @@ export function createPasswordResetDeliveryTask(
         }
       }
 
-      dependencies.logError("Password reset delivery failed.");
+      const errorType =
+        error instanceof Error ? error.name : "UnknownError";
+
+      dependencies.logError(
+        `Password reset delivery failed at ${stage} (${errorType}).`,
+      );
     }
   };
 }

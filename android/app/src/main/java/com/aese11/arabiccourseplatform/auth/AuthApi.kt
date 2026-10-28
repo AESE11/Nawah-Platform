@@ -131,6 +131,45 @@ object AuthApi {
         }
     }
 
+    suspend fun requestPasswordReset(
+        email: String
+    ): String = withContext(Dispatchers.IO) {
+
+        val requestBody = moshi.adapter(Map::class.java).toJson(
+            mapOf("email" to email.trim().lowercase())
+        )
+
+        val request = Request.Builder()
+            .url("${ApiClient.BASE_URL}/api/mobile/auth/forgot-password")
+            .post(
+                requestBody.toRequestBody(
+                    "application/json".toMediaType()
+                )
+            )
+            .build()
+
+        ApiClient.execute(request).use { response ->
+            val responseBody = response.body?.string().orEmpty()
+
+            val responseData = try {
+                moshi.adapter(Map::class.java).fromJson(responseBody)
+            } catch (_: Exception) {
+                null
+            }
+
+            if (!response.isSuccessful) {
+                val message = responseData?.get("message")?.toString()
+                throw Exception(
+                    message ?: "تعذر طلب إعادة تعيين كلمة المرور (HTTP ${response.code})."
+                )
+            }
+
+            responseData?.get("message")?.toString()
+                ?: "إذا كان البريد الإلكتروني مسجلًا لدينا، فستصلك رسالة تتضمن خطوات إعادة تعيين كلمة المرور."
+        }
+    }
+
+
     suspend fun me(token: String): AuthMeResponse = withContext(Dispatchers.IO) {
 
         val request = Request.Builder()

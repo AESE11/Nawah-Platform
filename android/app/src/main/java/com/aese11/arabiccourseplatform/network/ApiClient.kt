@@ -8,7 +8,7 @@ import okhttp3.Response
 
 object ApiClient {
 
-    const val BASE_URL = "http://192.168.100.4:3000"
+    const val BASE_URL = "https://nawah-platform-three.vercel.app"
 
     private val client = OkHttpClient()
 
