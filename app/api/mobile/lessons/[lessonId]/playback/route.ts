@@ -46,7 +46,30 @@ export async function GET(
     );
   }
 
-  const rateLimit = checkVideoTokenRateLimit(auth.userId);
+  let rateLimit;
+
+  try {
+    rateLimit = await checkVideoTokenRateLimit(auth.userId);
+  } catch {
+    console.error("Video token rate limiter unavailable.");
+    logVideoSecurityEvent({
+      event: "access_denied",
+      result: "failed",
+      userId: auth.userId,
+      lessonId,
+      errorCategory: "rate_limit",
+    });
+
+    return NextResponse.json(
+      { message: "Video playback is temporarily unavailable" },
+      {
+        status: 503,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  }
 
   if (!rateLimit.allowed) {
     logVideoSecurityEvent({

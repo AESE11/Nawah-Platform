@@ -1,11 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { getAdminSeedCredentials } from "../lib/security/admin-seed-config";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL ?? "admin@arabic-course-platform.local";
-  const password = process.env.ADMIN_PASSWORD ?? "ChangeThisStrongPassword123!";
+  const { email, password } = getAdminSeedCredentials(process.env);
 
   const existing = await prisma.user.findUnique({ where: { email } });
 
@@ -29,8 +29,8 @@ async function main() {
 }
 
 main()
-  .catch((error) => {
-    console.error("Failed to seed admin:", error);
+  .catch(() => {
+    console.error("Failed to seed admin. Check its configuration and database availability.");
     process.exit(1);
   })
   .finally(async () => {

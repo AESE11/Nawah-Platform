@@ -5,6 +5,8 @@ import { getDictionary } from "@/lib/i18n";
 import { isLocale } from "@/lib/locale";
 import { formatCoursePrice } from "@/lib/currency";
 
+export const dynamic = "force-dynamic";
+
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const safeLocale = isLocale(locale) ? locale : "ar";

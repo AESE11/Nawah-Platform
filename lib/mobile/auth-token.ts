@@ -1,17 +1,22 @@
+import { prisma } from "@/lib/prisma";
 import { SignJWT, jwtVerify } from "jose";
+import {
+  createPasswordAuthVersion,
+  isPasswordAuthVersionCurrent,
+} from "@/lib/security/password-auth-version";
 
 const MOBILE_TOKEN_ISSUER = "arabic-course-platform";
 const MOBILE_TOKEN_AUDIENCE = "android-app";
 const MOBILE_TOKEN_EXPIRY = "7d";
 
-function getMobileAuthSecret() {
+function getMobileAuthSecret(): string {
   const secret = process.env.MOBILE_AUTH_SECRET;
 
   if (!secret) {
     throw new Error("MOBILE_AUTH_SECRET is not configured.");
   }
 
-  return new TextEncoder().encode(secret);
+  return secret;
 }
 
 export type MobileTokenPayload = {
@@ -20,11 +25,16 @@ export type MobileTokenPayload = {
 };
 
 export async function createMobileAuthToken(
-  payload: MobileTokenPayload,
+  payload: MobileTokenPayload & { passwordHash: string },
+  secret = getMobileAuthSecret(),
 ) {
   return new SignJWT({
     role: payload.role,
     type: "mobile",
+    passwordAuthVersion: createPasswordAuthVersion(
+      payload.passwordHash,
+      secret,
+    ),
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setSubject(payload.userId)
@@ -32,13 +42,22 @@ export async function createMobileAuthToken(
     .setAudience(MOBILE_TOKEN_AUDIENCE)
     .setIssuedAt()
     .setExpirationTime(MOBILE_TOKEN_EXPIRY)
-    .sign(getMobileAuthSecret());
+    .sign(new TextEncoder().encode(secret));
 }
 
-export async function verifyMobileAuthToken(token: string) {
+export type MobileAuthUserRecord = {
+  role: MobileTokenPayload["role"];
+  passwordHash: string | null;
+};
+
+export async function verifyMobileAuthTokenWith(
+  token: string,
+  findUser: (userId: string) => Promise<MobileAuthUserRecord | null>,
+  secret = getMobileAuthSecret(),
+) {
   const { payload } = await jwtVerify(
     token,
-    getMobileAuthSecret(),
+    new TextEncoder().encode(secret),
     {
       issuer: MOBILE_TOKEN_ISSUER,
       audience: MOBILE_TOKEN_AUDIENCE,
@@ -48,7 +67,22 @@ export async function verifyMobileAuthToken(token: string) {
   if (
     payload.type !== "mobile" ||
     typeof payload.sub !== "string" ||
-    (payload.role !== "STUDENT" && payload.role !== "ADMIN")
+    (payload.role !== "STUDENT" && payload.role !== "ADMIN") ||
+    typeof payload.passwordAuthVersion !== "string"
+  ) {
+    throw new Error("Invalid mobile authentication token.");
+  }
+
+  const user = await findUser(payload.sub);
+
+  if (
+    !user?.passwordHash ||
+    user.role !== payload.role ||
+    !isPasswordAuthVersionCurrent(
+      payload.passwordAuthVersion,
+      user.passwordHash,
+      secret,
+    )
   ) {
     throw new Error("Invalid mobile authentication token.");
   }
@@ -57,4 +91,17 @@ export async function verifyMobileAuthToken(token: string) {
     userId: payload.sub,
     role: payload.role,
   } satisfies MobileTokenPayload;
+}
+
+export async function verifyMobileAuthToken(token: string) {
+  return verifyMobileAuthTokenWith(
+    token,
+    async (userId) => prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        role: true,
+        passwordHash: true,
+      },
+    }),
+  );
 }

@@ -1,37 +1,66 @@
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS_PER_WINDOW = 10;
-
-type RateLimitEntry = {
-  requests: number[];
-};
-
-const requestsByUser = new Map<string, RateLimitEntry>();
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 export interface VideoTokenRateLimitResult {
   allowed: boolean;
   retryAfterSeconds: number;
 }
 
-/**
- * Lightweight per-process protection for token issuance. It intentionally does
- * not sit in the Mux media path, where segment requests must remain unrestricted.
- */
-export function checkVideoTokenRateLimit(userId: string, now = Date.now()): VideoTokenRateLimitResult {
-  const earliestAllowedAt = now - WINDOW_MS;
-  const entry = requestsByUser.get(userId) ?? { requests: [] };
-  entry.requests = entry.requests.filter((requestedAt) => requestedAt > earliestAllowedAt);
+export const VIDEO_TOKEN_RATE_LIMIT = {
+  requests: 10,
+  window: "10 m",
+} as const;
 
-  if (entry.requests.length >= MAX_REQUESTS_PER_WINDOW) {
-    const retryAfterSeconds = Math.max(1, Math.ceil((entry.requests[0] + WINDOW_MS - now) / 1000));
-    requestsByUser.set(userId, entry);
-    return { allowed: false, retryAfterSeconds };
-  }
-
-  entry.requests.push(now);
-  requestsByUser.set(userId, entry);
-  return { allowed: true, retryAfterSeconds: 0 };
+export interface VideoTokenRateLimiter {
+  limit: (key: string) => Promise<{ success: boolean; reset: number }>;
 }
 
-export function resetVideoTokenRateLimitsForTests() {
-  requestsByUser.clear();
+let videoTokenLimiter: VideoTokenRateLimiter | undefined;
+
+function getVideoTokenLimiter(): VideoTokenRateLimiter {
+  if (videoTokenLimiter) {
+    return videoTokenLimiter;
+  }
+
+  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (!url || !token) {
+    throw new Error("Upstash rate limiting is not configured.");
+  }
+
+  videoTokenLimiter = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(
+      VIDEO_TOKEN_RATE_LIMIT.requests,
+      VIDEO_TOKEN_RATE_LIMIT.window,
+    ),
+    prefix: "nawah:video-token:user",
+    analytics: false,
+  });
+
+  return videoTokenLimiter;
+}
+
+export async function checkVideoTokenRateLimitWith(
+  userId: string,
+  limiter: VideoTokenRateLimiter,
+  now: () => number = Date.now,
+): Promise<VideoTokenRateLimitResult> {
+  const result = await limiter.limit(userId);
+
+  if (result.success) {
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+
+  return {
+    allowed: false,
+    retryAfterSeconds: Math.max(1, Math.ceil((result.reset - now()) / 1000)),
+  };
+}
+
+export async function checkVideoTokenRateLimit(
+  userId: string,
+): Promise<VideoTokenRateLimitResult> {
+  return checkVideoTokenRateLimitWith(userId, getVideoTokenLimiter());
 }

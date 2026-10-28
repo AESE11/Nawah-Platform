@@ -9,21 +9,22 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @default(cuid())
+  id                 String               @id @default(cuid())
   name               String?
-  email              String              @unique
+  email              String               @unique
   emailVerified      DateTime?
   image              String?
   passwordHash       String
-  role               Role                @default(STUDENT)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  role               Role                 @default(STUDENT)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   accounts           Account[]
   enrollments        Enrollment[]
   enrollmentRequests EnrollmentRequest[]
-  reviewedPayments   Payment[]           @relation("ReviewedPayments")
+  reviewedPayments   Payment[]            @relation("ReviewedPayments")
   payments           Payment[]
   sessions           Session[]
+  PasswordResetToken PasswordResetToken[]
 }
 
 model Account {
@@ -58,6 +59,19 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }
 
 model Category {
@@ -127,7 +141,6 @@ model Chapter {
   @@index([courseId, order])
 }
 
-
 model Lesson {
   id            String   @id @default(cuid())
   titleAr       String
@@ -144,7 +157,6 @@ model Lesson {
 
   @@index([chapterId, order])
 }
-
 
 model PaymentMethod {
   id               String    @id @default(cuid())
