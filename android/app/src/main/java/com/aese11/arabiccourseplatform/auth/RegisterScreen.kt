@@ -266,8 +266,8 @@ fun RegisterScreen(
                             successMessage = null
 
                             when {
-                                name.trim().length < 2 ->
-                                    errorMessage = "الاسم يجب أن يكون حرفين على الأقل."
+                                name.trim().split(Regex("\\s+")).count { it.isNotBlank() } < 4 ->
+                                    errorMessage = "يجب إدخال الاسم الرباعي على الأقل (أربعة أسماء)."
 
                                 !android.util.Patterns.EMAIL_ADDRESS
                                     .matcher(email.trim()).matches() ->
@@ -287,7 +287,7 @@ fun RegisterScreen(
                                         loading = true
                                         try {
                                             repository.register(
-                                                name.trim(),
+                                                name.trim().split(Regex("\\s+")).joinToString(" "),
                                                 email.trim(),
                                                 password
                                             )

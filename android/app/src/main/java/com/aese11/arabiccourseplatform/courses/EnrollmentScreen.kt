@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -492,8 +493,8 @@ fun EnrollmentScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Filled.School,
-                                        contentDescription = null,
+                                        imageVector = Icons.Filled.AccountBalanceWallet,
+                                        contentDescription = "محفظة الدفع",
                                         modifier = Modifier.size(26.dp),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
@@ -532,9 +533,11 @@ fun EnrollmentScreen(
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                                     Text(
                                         text = "تعليمات الدفع",
+                                        modifier = Modifier.fillMaxWidth(),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = TextAlign.Right
                                     )
                                     Text(
                                         text = instructions,
