@@ -62,7 +62,7 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "أهلًا بيك في جرعة 👋",
+                        text = "أهلًا بك في نواة 👋",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
@@ -70,7 +70,7 @@ fun HomeScreen(
                         textAlign = TextAlign.Right
                     )
                     Text(
-                        text = "جاهز تكمل رحلتك التعليمية؟",
+                        text = "جاهز لتكمل رحلتك التعليمية؟",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -118,7 +118,7 @@ fun HomeScreen(
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
-                        text = "طوّر مهاراتك مع جرعة",
+                        text = "طوّر مهاراتك مع نواة",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
@@ -126,7 +126,7 @@ fun HomeScreen(
                         textAlign = TextAlign.Right
                     )
                     Text(
-                        text = "اكتشف كورسات جديدة وابدأ خطوتك الجاية.",
+                        text = "اكتشف دورات جديدة وابدأ خطوتك القادمة.",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -140,7 +140,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "اكتشف الكورسات",
+                            text = "اكتشف الدورات",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimary
@@ -172,7 +172,7 @@ fun HomeScreen(
                 HomeShortcut(
                     modifier = Modifier.weight(1f),
                     title = "دوراتي",
-                    description = "الكورسات المسجل فيها",
+                    description = "الدورات المسجل بها",
                     onClick = onMyCourses
                 ) {
                     Icon(

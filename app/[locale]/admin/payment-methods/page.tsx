@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AdminBreadcrumbs } from "@/components/admin/breadcrumbs";
 import { ConfirmActionButton } from "@/components/admin/confirm-action";
-import { createPaymentMethodAction, deletePaymentMethodAction, updatePaymentMethodAction } from "@/lib/actions/payment-method-actions";
+import { createPaymentMethodAction, setPaymentMethodEnabledAction, updatePaymentMethodAction } from "@/lib/actions/payment-method-actions";
 import { isLocale } from "@/lib/locale";
 
 export default async function AdminPaymentMethodsPage({
@@ -143,12 +143,24 @@ export default async function AdminPaymentMethodsPage({
                     </form>
                     <form action={async (formData) => {
                       "use server";
-                      await deletePaymentMethodAction(formData, safeLocale);
+                      await setPaymentMethodEnabledAction(formData, safeLocale);
                     }}>
                       <input type="hidden" name="paymentMethodId" value={method.id} />
-                      <ConfirmActionButton type="submit" size="sm" variant="outline" confirmText={safeLocale === "ar" ? "هل تريد حذف طريقة الدفع هذه؟" : "Delete this payment method?"}>
-                        {safeLocale === "ar" ? "حذف" : "Delete"}
-                      </ConfirmActionButton>
+                      <input type="hidden" name="enabled" value={String(!method.enabled)} />
+                      {method.enabled ? (
+                        <ConfirmActionButton
+                          type="submit"
+                          size="sm"
+                          variant="outline"
+                          confirmText={safeLocale === "ar" ? "هل تريد تعطيل طريقة الدفع؟ ستظل سجلات الدفع القديمة محفوظة." : "Disable this payment method? Existing payment records will be preserved."}
+                        >
+                          {safeLocale === "ar" ? "تعطيل" : "Disable"}
+                        </ConfirmActionButton>
+                      ) : (
+                        <Button type="submit" size="sm" variant="outline">
+                          {safeLocale === "ar" ? "إعادة التفعيل" : "Enable"}
+                        </Button>
+                      )}
                     </form>
                   </div>
                 </div>

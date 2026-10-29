@@ -79,6 +79,54 @@ export async function updatePaymentMethodAction(formData: FormData, locale: stri
   return paymentMethod;
 }
 
+
+export async function disablePaymentMethodAction(formData: FormData, locale: string) {
+  await ensureAdminAccess(locale);
+
+  const id = normalizeText(formData.get("paymentMethodId"));
+  if (!id) {
+    throw new Error("Payment method ID is required.");
+  }
+
+  const paymentMethod = await prisma.paymentMethod.update({
+    where: { id },
+    data: { enabled: false },
+  });
+
+  revalidatePath(`/${locale}/admin/payment-methods`);
+  revalidatePath(`/${locale}/admin`);
+  revalidatePath(`/${locale}/courses`);
+  revalidatePath(`/${locale}/checkout`);
+
+  return paymentMethod;
+}
+
+export async function setPaymentMethodEnabledAction(formData: FormData, locale: string) {
+  await ensureAdminAccess(locale);
+
+  const id = normalizeText(formData.get("paymentMethodId"));
+  const enabledValue = normalizeText(formData.get("enabled"));
+
+  if (!id) {
+    throw new Error("Payment method ID is required.");
+  }
+  if (enabledValue !== "true" && enabledValue !== "false") {
+    throw new Error("A valid enabled status is required.");
+  }
+
+  const paymentMethod = await prisma.paymentMethod.update({
+    where: { id },
+    data: { enabled: enabledValue === "true" },
+  });
+
+  revalidatePath(`/${locale}/admin/payment-methods`);
+  revalidatePath(`/${locale}/admin`);
+  revalidatePath(`/${locale}/courses`);
+  revalidatePath(`/${locale}/checkout`);
+
+  return paymentMethod;
+}
+
 export async function deletePaymentMethodAction(formData: FormData, locale: string) {
   await ensureAdminAccess(locale);
 

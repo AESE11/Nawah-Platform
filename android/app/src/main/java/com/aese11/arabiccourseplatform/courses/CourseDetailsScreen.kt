@@ -61,9 +61,9 @@ fun CourseDetailsScreen(
             course = CourseDetailsApi.getCourseDetails(token = token, courseId = courseId).course
         } catch (e: ApiException) {
             if (e.isUnauthorized) onSessionExpired()
-            else errorMessage = e.message ?: "حدث خطأ أثناء تحميل تفاصيل الكورس."
+            else errorMessage = e.message ?: "حدث خطأ أثناء تحميل تفاصيل الدورة."
         } catch (e: Exception) {
-            errorMessage = e.message ?: "حدث خطأ أثناء تحميل تفاصيل الكورس."
+            errorMessage = e.message ?: "حدث خطأ أثناء تحميل تفاصيل الدورة."
         } finally {
             loading = false
         }
@@ -219,7 +219,7 @@ fun CourseDetailsScreen(
                         if (!currentCourse.outcomesAr.isNullOrBlank()) {
                             item {
                                 CourseInfoCard(
-                                    title = "ماذا ستتعلم؟",
+                                    title = "المخرجات والنتائج - ماذا ستتعلم؟",
                                     content = currentCourse.outcomesAr
                                 )
                             }

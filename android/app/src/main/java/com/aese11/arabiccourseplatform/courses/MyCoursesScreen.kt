@@ -87,10 +87,10 @@ fun MyCoursesScreen(
             if (e.isUnauthorized) {
                 onSessionExpired()
             } else {
-                errorMessage = e.message ?: "حدث خطأ أثناء تحميل الكورسات."
+                errorMessage = e.message ?: "حدث خطأ أثناء تحميل الدورات."
             }
         } catch (e: Exception) {
-            errorMessage = e.message ?: "حدث خطأ أثناء تحميل الكورسات."
+            errorMessage = e.message ?: "حدث خطأ أثناء تحميل الدورات."
         } finally {
             loading = false
         }
@@ -139,7 +139,7 @@ fun MyCoursesScreen(
                         textAlign = TextAlign.Right
                     )
                     Text(
-                        text = "تابع الكورسات اللي أنت مسجل فيها",
+                        text = "تابع الدورات التى أنت مسجل بها",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -163,7 +163,7 @@ fun MyCoursesScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "جاري تحميل كورساتك...",
+                                text = "جاري تحميل دوراتك...",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -187,7 +187,7 @@ fun MyCoursesScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "تعذر تحميل الكورسات",
+                                    text = "تعذر تحميل الدورات",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
@@ -239,14 +239,14 @@ fun MyCoursesScreen(
                                 }
                             }
                             Text(
-                                text = "لسه مفيش كورسات عندك",
+                                text = "ليس لديك دورات الى الان",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground,
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                text = "الكورسات المسجل فيها هتظهر هنا.",
+                                text = "الدورات المسجل بها ستظهر هنا.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
@@ -260,7 +260,7 @@ fun MyCoursesScreen(
                             }
 
                             Button(onClick = onPublicCoursesClick) {
-                                Text("استكشف الكورسات")
+                                Text("استكشف الدورات")
                             }
 
                         }
@@ -323,7 +323,7 @@ fun MyCoursesScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "كورساتك المسجلة",
+                                    text = "دوراتك المسجلة",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onBackground
@@ -333,7 +333,7 @@ fun MyCoursesScreen(
                                     color = MaterialTheme.colorScheme.primaryContainer
                                 ) {
                                     Text(
-                                        text = "${courses.size} كورس",
+                                        text = "${courses.size} دورة",
                                         modifier = Modifier.padding(
                                             horizontal = 12.dp,
                                             vertical = 7.dp
@@ -389,7 +389,7 @@ fun MyCoursesScreen(
                                                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                                                 )
                                                 Text(
-                                                    text = "صورة الكورس غير متاحة",
+                                                    text = "صورة الدورة غير متاحة",
                                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                                 )
                                             }
@@ -474,7 +474,7 @@ fun MyCoursesScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = "عرض تفاصيل الكورس",
+                                                text = "عرض تفاصيل الدورة",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold

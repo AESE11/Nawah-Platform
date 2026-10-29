@@ -86,7 +86,7 @@ fun PublicCoursesScreen(
             if (e.statusCode == 401) {
                 onSessionExpired()
             } else {
-                errorMessage = e.message ?: "حدث خطأ أثناء تحميل الكورسات."
+                errorMessage = e.message ?: "حدث خطأ أثناء تحميل الدورات."
             }
         } catch (e: Exception) {
             errorMessage = e.message ?: "تعذر الاتصال بالخادم."
@@ -131,7 +131,7 @@ fun PublicCoursesScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "استكشف الكورسات",
+                        text = "استكشف الدورات",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
@@ -139,7 +139,7 @@ fun PublicCoursesScreen(
                         textAlign = TextAlign.Right
                     )
                     Text(
-                        text = "اختار الكورس اللي يناسب أهدافك",
+                        text = "اختار الدورة التي تناسب أهدافك",
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -162,7 +162,7 @@ fun PublicCoursesScreen(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "جاري تحميل الكورسات...",
+                            text = "جاري تحميل الدورات...",
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -207,7 +207,7 @@ fun PublicCoursesScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "لا توجد كورسات منشورة حاليًا.",
+                            text = "لا توجد دورات منشورة حاليًا.",
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -276,7 +276,7 @@ fun PublicCoursesScreen(
                                                         tint = MaterialTheme.colorScheme.onPrimary
                                                     )
                                                     Text(
-                                                        text = "كورس مميز",
+                                                        text = "دورة مميز",
                                                         style = MaterialTheme.typography.labelMedium,
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.onPrimary
@@ -394,7 +394,7 @@ fun PublicCoursesScreen(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    text = "عرض تفاصيل الكورس",
+                                                    text = "عرض تفاصيل الدورة",
                                                     style = MaterialTheme.typography.labelLarge,
                                                     fontWeight = FontWeight.Bold,
                                                     color = MaterialTheme.colorScheme.primary

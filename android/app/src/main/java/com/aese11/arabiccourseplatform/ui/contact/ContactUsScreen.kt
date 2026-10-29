@@ -39,10 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-// Add the real contact details here when they are ready.
+// Contact details for Nawah platform.
 private const val CONTACT_PHONE = "01146890206"
 private const val CONTACT_WHATSAPP = "201146890206"
-private const val CONTACT_EMAIL = ""
+private const val CONTACT_OFFICIAL_EMAIL = "info.nawahplatform@gmail.com"
+private const val CONTACT_SUPPORT_EMAIL = "support.nawahplatform@gmail.com"
 
 @Composable
 fun ContactUsScreen(
@@ -116,7 +117,7 @@ fun ContactUsScreen(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "يمكنك التواصل معنا للاستفسار عن الدورات أو طلب المساعدة الفنية وحل المشكلات. سنضيف بيانات التواصل قريبًا.",
+                    text = "يمكنك التواصل معنا للاستفسار عن الدورات أو طلب المساعدة الفنية وحل المشكلات.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -152,20 +153,34 @@ fun ContactUsScreen(
         )
 
         ContactMethodCard(
-            title = "البريد الإلكتروني",
-            description = if (CONTACT_EMAIL.isBlank()) "سيتم إضافة البريد الإلكتروني الرسمي قريبًا" else CONTACT_EMAIL,
-            buttonText = "إرسال بريد إلكتروني",
-            enabled = CONTACT_EMAIL.isNotBlank(),
+            title = "الدعم الفني",
+            description = CONTACT_SUPPORT_EMAIL,
+            buttonText = "التواصل مع الدعم الفني",
+            enabled = CONTACT_SUPPORT_EMAIL.isNotBlank(),
             icon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
             onClick = {
                 context.startActivity(
-                    Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$CONTACT_EMAIL"))
+                    Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$CONTACT_SUPPORT_EMAIL"))
                 )
             }
         )
 
+        ContactMethodCard(
+            title = "البريد الإلكتروني الرسمي",
+            description = CONTACT_OFFICIAL_EMAIL,
+            buttonText = "مراسلة الإدارة",
+            enabled = CONTACT_OFFICIAL_EMAIL.isNotBlank(),
+            icon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            onClick = {
+                context.startActivity(
+                    Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$CONTACT_OFFICIAL_EMAIL"))
+                )
+            }
+        )
+
+
         Text(
-            text = "جرعة — نتمنى لك تجربة تعليمية مميزة",
+            text = "نواة — نتمنى لك تجربة تعليمية مميزة",
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
