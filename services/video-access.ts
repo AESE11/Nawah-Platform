@@ -12,6 +12,8 @@ export interface LessonAccessEvaluationInput {
   hasPlaybackId?: boolean;
   lessonExists?: boolean;
   playbackId?: string | null;
+  videoProvider?: "VCDN" | "YOUTUBE" | null;
+  youtubeVideoId?: string | null;
 }
 
 export interface LessonAccessEvaluationResult {
@@ -96,8 +98,12 @@ export async function canAccessLesson(userId: string, lessonId: string) {
     lessonExists: true,
     enrollmentStatus: activeEnrollment?.status ?? null,
     hasActiveEnrollment: Boolean(activeEnrollment),
-    hasPlaybackId: Boolean(lesson.vcdnVideoId),
-    playbackId: lesson.vcdnVideoId,
+    hasPlaybackId: lesson.videoProvider === "YOUTUBE"
+      ? Boolean(lesson.youtubeVideoId)
+      : Boolean(lesson.vcdnVideoId),
+    playbackId: lesson.videoProvider === "YOUTUBE"
+      ? lesson.youtubeVideoId
+      : lesson.vcdnVideoId,
   });
 }
 
@@ -127,7 +133,11 @@ export async function canAccessLessonForCourse(userId: string, courseId: string,
     lessonExists: true,
     enrollmentStatus: activeEnrollment?.status ?? null,
     hasActiveEnrollment: Boolean(activeEnrollment),
-    hasPlaybackId: Boolean(lesson.vcdnVideoId),
-    playbackId: lesson.vcdnVideoId,
+    hasPlaybackId: lesson.videoProvider === "YOUTUBE"
+      ? Boolean(lesson.youtubeVideoId)
+      : Boolean(lesson.vcdnVideoId),
+    playbackId: lesson.videoProvider === "YOUTUBE"
+      ? lesson.youtubeVideoId
+      : lesson.vcdnVideoId,
   });
 }

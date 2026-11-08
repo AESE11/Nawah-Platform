@@ -7,8 +7,11 @@ data class PlaybackResponse(
     val lessonId: String,
     val courseId: String,
     val authorized: Boolean,
-    val mode: String,
-    val streamUrl: String,
-    val expires: Long?,
+    val provider: String = "VCDN",
+    val mode: String? = null,
+    val streamUrl: String? = null,
+    val youtubeVideoId: String? = null,
+    val playerOrigin: String? = null,
+    val expires: Long? = null,
     val watermarkId: String
 )

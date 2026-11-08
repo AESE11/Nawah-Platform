@@ -63,8 +63,25 @@ export const lessonSchema = z.object({
   descriptionEn: z.string().trim().max(contentLimits.lessonDescription).optional().or(z.literal("")),
   order: z.coerce.number().int().min(0),
   chapterId: z.string().trim().min(1, "Chapter is required."),
+  videoProvider: z.enum(["VCDN", "YOUTUBE"]).default("VCDN"),
   vcdnVideoId: z.string().trim().max(contentLimits.mediaIdentifier).optional().or(z.literal("")),
+  youtubeVideoId: z.string().trim().max(contentLimits.mediaIdentifier).optional().or(z.literal("")),
   duration: z.coerce.number().int().min(0).optional().or(z.literal("")),
+}).superRefine((value, ctx) => {
+  const vcdnId = value.vcdnVideoId?.trim() ?? "";
+  const youtubeId = value.youtubeVideoId?.trim() ?? "";
+  if (value.videoProvider === "VCDN" && youtubeId) {
+    ctx.addIssue({ code: "custom", path: ["youtubeVideoId"], message: "A lesson can use only one video provider." });
+  }
+  if (value.videoProvider === "YOUTUBE" && vcdnId) {
+    ctx.addIssue({ code: "custom", path: ["vcdnVideoId"], message: "A lesson can use only one video provider." });
+  }
+  if (value.videoProvider === "YOUTUBE" && !youtubeId) {
+    ctx.addIssue({ code: "custom", path: ["youtubeVideoId"], message: "YouTube video ID is required." });
+  }
+  if (value.videoProvider === "YOUTUBE" && youtubeId && !/^[A-Za-z0-9_-]{11}$/.test(youtubeId)) {
+    ctx.addIssue({ code: "custom", path: ["youtubeVideoId"], message: "Enter a valid YouTube video ID or URL." });
+  }
 });
 
 export type CategoryFormValues = z.infer<typeof categorySchema>;

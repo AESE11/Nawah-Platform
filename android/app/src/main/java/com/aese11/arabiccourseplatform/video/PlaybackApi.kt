@@ -32,9 +32,23 @@ object PlaybackApi {
         ApiClient.execute(request).use { response ->
 
             if (!response.isSuccessful) {
+                val errorBody = response.body
+                    ?.string()
+                    ?.trim()
+                    .orEmpty()
+
+                val diagnosticMessage = buildString {
+                    append("Get playback failed: HTTP ${response.code}")
+
+                    if (errorBody.isNotBlank()) {
+                        append("\nServer response: ")
+                        append(errorBody.take(500))
+                    }
+                }
+
                 throw ApiException(
                     statusCode = response.code,
-                    message = "Get playback failed: HTTP ${response.code}"
+                    message = diagnosticMessage
                 )
             }
 

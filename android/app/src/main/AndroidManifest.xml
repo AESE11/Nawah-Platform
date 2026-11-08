@@ -12,6 +12,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:hardwareAccelerated="true"
         android:theme="@style/Theme.ArabicCoursePlatform">
 
         <activity
@@ -20,6 +21,7 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.ArabicCoursePlatform"
             android:windowSoftInputMode="adjustResize"
+            android:hardwareAccelerated="true"
             android:configChanges="orientation|screenSize">
 
             <intent-filter>

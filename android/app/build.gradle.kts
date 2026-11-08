@@ -61,4 +61,5 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.appcompat)
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:13.0.0")
 }

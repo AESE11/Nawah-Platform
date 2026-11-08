@@ -141,6 +141,11 @@ model Chapter {
   @@index([courseId, order])
 }
 
+enum VideoProvider {
+  VCDN
+  YOUTUBE
+}
+
 model Lesson {
   id            String   @id @default(cuid())
   titleAr       String
@@ -149,8 +154,10 @@ model Lesson {
   descriptionEn String?
   order         Int      @default(0)
   chapterId     String
-  vcdnVideoId   String?
-  duration      Int?
+  vcdnVideoId    String?
+  youtubeVideoId String?
+  videoProvider  VideoProvider @default(VCDN)
+  duration       Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   chapter       Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)

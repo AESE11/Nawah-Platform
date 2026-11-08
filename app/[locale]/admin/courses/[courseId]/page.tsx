@@ -227,12 +227,29 @@ export default async function AdminCourseDetailPage({
                 <input type="hidden" name="chapterId" value={chapter.id} />
                 <input name="titleAr" placeholder={safeLocale === "ar" ? "عنوان الدرس بالعربية" : "Arabic lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <input name="titleEn" placeholder={safeLocale === "ar" ? "عنوان الدرس بالإنجليزية" : "English lesson title"} maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
+                <select name="videoProvider" defaultValue="VCDN" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800">
+                  <option value="VCDN">VCDN</option>
+                  <option value="YOUTUBE">YouTube</option>
+                </select>
                 <input
-  name="vcdnVideoId"
-  placeholder="VCDN Video ID"
-  maxLength={contentLimits.mediaIdentifier}
-  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800"
-/>
+                  name="vcdnVideoId"
+                  placeholder="VCDN Video ID (VCDN only)"
+                  maxLength={contentLimits.mediaIdentifier}
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800"
+                />
+                <input
+                  name="youtubeVideoId"
+                  placeholder="YouTube URL or Video ID (YouTube only)"
+                  maxLength={contentLimits.mediaIdentifier}
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800"
+                />
+                {Number(course.price) > 0 ? (
+                  <p className="md:col-span-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                    {safeLocale === "ar"
+                      ? "تنبيه: استخدام YouTube في درس مدفوع يعني إمكانية استخراج معرّف الفيديو ومشاهدته خارج تطبيق نواة. حماية YouTube ليست بمستوى VCDN."
+                      : "Warning: YouTube videos in paid lessons may be watched outside Nawah if the video ID is obtained. YouTube does not provide the same protection as VCDN."}
+                  </p>
+                ) : null}
                 <input name="duration" type="number" min="0" placeholder={safeLocale === "ar" ? "المدة (ثانية)" : "Duration (seconds)"} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800" />
                 <Button type="submit" size="sm">{safeLocale === "ar" ? "إضافة درس" : "Add lesson"}</Button>
               </form>
@@ -284,13 +301,31 @@ export default async function AdminCourseDetailPage({
                       <input name="titleEn" defaultValue={lesson.titleEn} required maxLength={contentLimits.lessonTitle} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <textarea name="descriptionAr" defaultValue={lesson.descriptionAr ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <textarea name="descriptionEn" defaultValue={lesson.descriptionEn ?? ""} rows={2} maxLength={contentLimits.lessonDescription} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
+                      <select name="videoProvider" defaultValue={lesson.videoProvider ?? "VCDN"} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800">
+                        <option value="VCDN">VCDN</option>
+                        <option value="YOUTUBE">YouTube</option>
+                      </select>
                       <input
-  name="vcdnVideoId"
-  defaultValue={lesson.vcdnVideoId ?? ""}
-  placeholder="VCDN Video ID"
-  maxLength={contentLimits.mediaIdentifier}
-  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800"
-/>
+                        name="vcdnVideoId"
+                        defaultValue={lesson.vcdnVideoId ?? ""}
+                        placeholder="VCDN Video ID (VCDN only)"
+                        maxLength={contentLimits.mediaIdentifier}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800"
+                      />
+                      <input
+                        name="youtubeVideoId"
+                        defaultValue={lesson.youtubeVideoId ?? ""}
+                        placeholder="YouTube URL or Video ID (YouTube only)"
+                        maxLength={contentLimits.mediaIdentifier}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800"
+                      />
+                      {Number(course.price) > 0 ? (
+                        <p className="md:col-span-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                          {safeLocale === "ar"
+                            ? "تنبيه: استخدام YouTube في درس مدفوع يعني إمكانية استخراج معرّف الفيديو ومشاهدته خارج تطبيق نواة. حماية YouTube ليست بمستوى VCDN."
+                            : "Warning: YouTube videos in paid lessons may be watched outside Nawah if the video ID is obtained. YouTube does not provide the same protection as VCDN."}
+                        </p>
+                      ) : null}
                       <input name="duration" type="number" min="0" defaultValue={lesson.duration ?? ""} placeholder={safeLocale === "ar" ? "المدة (ثانية)" : "Duration (seconds)"} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800" />
                       <input type="hidden" name="order" value={lesson.order} />
                       <Button type="submit" size="sm">{safeLocale === "ar" ? "حفظ الدرس" : "Save lesson"}</Button>

@@ -1,5 +1,6 @@
 package com.aese11.arabiccourseplatform.ui.video
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +57,8 @@ fun VideoPlayerScreen(
     var watermarkId by remember {
         mutableStateOf<String?>(null)
     }
+    var youtubeVideoId by remember { mutableStateOf<String?>(null) }
+    var playerOrigin by remember { mutableStateOf<String?>(null) }
 
     var loading by remember {
         mutableStateOf(true)
@@ -71,6 +74,14 @@ fun VideoPlayerScreen(
 
     val player = remember {
         ExoPlayer.Builder(context).build()
+    }
+
+    /*
+     * زر الرجوع يطلع من ملء الشاشة أولاً
+     */
+    BackHandler(enabled = isFullscreen) {
+        isFullscreen = false
+        activity?.let { applyFullscreen(it, false) }
     }
 
     /*
@@ -109,19 +120,24 @@ fun VideoPlayerScreen(
                 return@LaunchedEffect
             }
 
-            watermarkId =
-                playback.watermarkId
+            watermarkId = playback.watermarkId
 
-            val mediaItem =
-                MediaItem.fromUri(
-                    playback.streamUrl
-                )
-
-            player.setMediaItem(mediaItem)
-
-            player.prepare()
-
-            player.playWhenReady = true
+            when (playback.provider.uppercase()) {
+                "YOUTUBE" -> {
+                    youtubeVideoId = playback.youtubeVideoId
+                        ?: throw Exception("YouTube video is not configured.")
+                    playerOrigin = playback.playerOrigin
+                        ?: throw Exception("APP_BASE_URL must be configured with the HTTPS website origin for YouTube playback.")
+                }
+                "VCDN" -> {
+                    val streamUrl = playback.streamUrl
+                        ?: throw Exception("VCDN stream URL is missing.")
+                    player.setMediaItem(MediaItem.fromUri(streamUrl))
+                    player.prepare()
+                    player.playWhenReady = true
+                }
+                else -> throw Exception("Unsupported video provider.")
+            }
 
 
         } catch (e: ApiException) {
@@ -260,7 +276,18 @@ fun VideoPlayerScreen(
 
             else -> {
 
-                AndroidView(
+                if (youtubeVideoId != null) {
+                    YouTubeEmbeddedPlayer(
+                        videoId = youtubeVideoId!!,
+                        pageOrigin = playerOrigin!!,
+                        isFullscreen = isFullscreen,
+                        onToggleFullscreen = {
+                            isFullscreen = !isFullscreen
+                            activity?.let { applyFullscreen(it, isFullscreen) }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else AndroidView(
                     factory = { playerContext ->
 
                         PlayerView(playerContext).apply {
@@ -359,5 +386,30 @@ fun VideoPlayerScreen(
                 }
             }
         }
+    }
+}
+
+/*
+ * تبديل ملء الشاشة (تدوير + إخفاء شريط النظام)
+ */
+private fun applyFullscreen(
+    activity: androidx.activity.ComponentActivity,
+    enable: Boolean
+) {
+    val controller = WindowInsetsControllerCompat(
+        activity.window,
+        activity.window.decorView
+    )
+
+    if (enable) {
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        WindowCompat.setDecorFitsSystemWindows(activity.window, false)
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+    } else {
+        controller.show(WindowInsetsCompat.Type.systemBars())
+        WindowCompat.setDecorFitsSystemWindows(activity.window, true)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 }

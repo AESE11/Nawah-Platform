@@ -9,6 +9,26 @@ function normalizeText(value: FormDataEntryValue | null | undefined) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizeYouTubeVideoId(value: string) {
+  const input = value.trim();
+  if (!input) return "";
+  if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
+
+  try {
+    const url = new URL(input);
+    let id = "";
+    if (url.hostname === "youtu.be" || url.hostname === "www.youtu.be") {
+      id = url.pathname.split("/").filter(Boolean)[0] ?? "";
+    } else if (["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(url.hostname)) {
+      if (url.pathname === "/watch") id = url.searchParams.get("v") ?? "";
+      else if (/^\/(embed|shorts|live)\//.test(url.pathname)) id = url.pathname.split("/")[2] ?? "";
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : input;
+  } catch {
+    return input;
+  }
+}
+
 function buildSlug(value: string) {
   return value
     .toLowerCase()
@@ -384,7 +404,11 @@ export async function createLessonAction(formData: FormData, locale: string) {
     descriptionEn: normalizeText(formData.get("descriptionEn")),
     order: normalizeText(formData.get("order")) || "0",
     chapterId,
-    vcdnVideoId: normalizeText(formData.get("vcdnVideoId")),
+    videoProvider: normalizeText(formData.get("videoProvider")) || "VCDN",
+    vcdnVideoId: (normalizeText(formData.get("videoProvider")) || "VCDN") === "VCDN"
+      ? normalizeText(formData.get("vcdnVideoId")) : "",
+    youtubeVideoId: (normalizeText(formData.get("videoProvider")) || "VCDN") === "YOUTUBE"
+      ? normalizeYouTubeVideoId(normalizeText(formData.get("youtubeVideoId"))) : "",
     duration: normalizeText(formData.get("duration")) || "0",
   };
 
@@ -402,7 +426,9 @@ export async function createLessonAction(formData: FormData, locale: string) {
       order: Number(parsed.order || (maxOrder?.order ?? 0) + 1),
       descriptionAr: parsed.descriptionAr || null,
       descriptionEn: parsed.descriptionEn || null,
-      vcdnVideoId: parsed.vcdnVideoId || null,
+      videoProvider: parsed.videoProvider,
+      vcdnVideoId: parsed.videoProvider === "VCDN" ? (parsed.vcdnVideoId || null) : null,
+      youtubeVideoId: parsed.videoProvider === "YOUTUBE" ? (parsed.youtubeVideoId || null) : null,
       duration: parsed.duration ? Number(parsed.duration) : null,
     },
   });
@@ -426,7 +452,11 @@ export async function updateLessonAction(formData: FormData, locale: string) {
     descriptionEn: normalizeText(formData.get("descriptionEn")),
     order: normalizeText(formData.get("order")) || "0",
     chapterId,
-    vcdnVideoId: normalizeText(formData.get("vcdnVideoId")),
+    videoProvider: normalizeText(formData.get("videoProvider")) || "VCDN",
+    vcdnVideoId: (normalizeText(formData.get("videoProvider")) || "VCDN") === "VCDN"
+      ? normalizeText(formData.get("vcdnVideoId")) : "",
+    youtubeVideoId: (normalizeText(formData.get("videoProvider")) || "VCDN") === "YOUTUBE"
+      ? normalizeYouTubeVideoId(normalizeText(formData.get("youtubeVideoId"))) : "",
     duration: normalizeText(formData.get("duration")) || "0",
   };
 
@@ -438,7 +468,9 @@ export async function updateLessonAction(formData: FormData, locale: string) {
       ...parsed,
       descriptionAr: parsed.descriptionAr || null,
       descriptionEn: parsed.descriptionEn || null,
-      vcdnVideoId: parsed.vcdnVideoId || null,
+      videoProvider: parsed.videoProvider,
+      vcdnVideoId: parsed.videoProvider === "VCDN" ? (parsed.vcdnVideoId || null) : null,
+      youtubeVideoId: parsed.videoProvider === "YOUTUBE" ? (parsed.youtubeVideoId || null) : null,
       duration: parsed.duration ? Number(parsed.duration) : null,
       order: Number(parsed.order),
     },

@@ -7,6 +7,24 @@ import { logVideoSecurityEvent } from "@/lib/security/video-security-log";
 import { getVcdnPlaybackConfig } from "@/lib/vcdn";
 import { getStudentWatermarkId } from "@/lib/watermark";
 
+function getPlayerOrigin(): string | null {
+  const configured =
+    process.env.YOUTUBE_PLAYER_ORIGIN?.trim() ||
+    process.env.APP_BASE_URL?.trim();
+
+  if (!configured) return null;
+
+  try {
+    const url = new URL(configured);
+
+    if (url.protocol !== "https:") return null;
+
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 export const dynamic = "force-dynamic";
 
 export async function GET(
@@ -139,7 +157,12 @@ export async function GET(
     );
   }
 
-  if (!lesson.vcdnVideoId) {
+  const provider = lesson.videoProvider ?? "VCDN";
+  const hasConfiguredVideo = provider === "YOUTUBE"
+    ? Boolean(lesson.youtubeVideoId)
+    : Boolean(lesson.vcdnVideoId);
+
+  if (!hasConfiguredVideo) {
     logVideoSecurityEvent({
       event: "access_denied",
       result: "denied",
@@ -151,15 +174,37 @@ export async function GET(
 
     return NextResponse.json(
       { message: "Video is not configured for this lesson" },
-      { status: 404 },
+      { status: 404, headers: { "Cache-Control": "no-store" } },
     );
   }
 
   try {
-    const playback = await getVcdnPlaybackConfig(
-      lesson.vcdnVideoId,
-    );
     const watermarkId = getStudentWatermarkId(auth.userId);
+
+    if (provider === "YOUTUBE") {
+      logVideoSecurityEvent({
+        event: "token_issued",
+        result: "allowed",
+        userId: auth.userId,
+        lessonId,
+        courseId: lesson.chapter.courseId,
+      });
+
+      return NextResponse.json(
+        {
+          lessonId: lesson.id,
+          courseId: lesson.chapter.courseId,
+          authorized: true,
+          provider: "YOUTUBE",
+          youtubeVideoId: lesson.youtubeVideoId,
+          playerOrigin: getPlayerOrigin(),
+          watermarkId,
+        },
+        { headers: { "Cache-Control": "private, no-store" } },
+      );
+    }
+
+    const playback = await getVcdnPlaybackConfig(lesson.vcdnVideoId!);
 
     logVideoSecurityEvent({
       event: "token_issued",
@@ -174,16 +219,13 @@ export async function GET(
         lessonId: lesson.id,
         courseId: lesson.chapter.courseId,
         authorized: true,
+        provider: "VCDN",
         mode: playback.mode,
         streamUrl: playback.streamUrl,
         expires: playback.expires ?? null,
         watermarkId,
       },
-      {
-        headers: {
-          "Cache-Control": "private, no-store",
-        },
-      },
+      { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch (error) {
     console.error("VCDN playback error:", error);
