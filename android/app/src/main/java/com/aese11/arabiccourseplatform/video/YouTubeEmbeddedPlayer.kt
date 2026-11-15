@@ -189,10 +189,11 @@ fun YouTubeEmbeddedPlayer(
 
                             // v13: الـ Builder بياخد context، والـ origin بيتحدد تلقائياً من package التطبيق
                             val options = IFramePlayerOptions.Builder(context)
-                                .controls(0)        // نقفل شريط تحكم يوتيوب
-                                .fullscreen(0)      // نقفل ملء الشاشة بتاع يوتيوب
+                                .controls(0)
+                                .fullscreen(0)
                                 .rel(0)
-                                .ivLoadPolicy(3)    // نقفل الـ annotations
+                                .ivLoadPolicy(3)
+                                .ccLoadPolicy(1)
                                 .build()
 
                             playerView.initialize(listener, true, options)
