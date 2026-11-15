@@ -13,14 +13,24 @@ android {
         applicationId = "com.aese11.arabiccourseplatform"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("NAWAH_KEYSTORE_PATH") ?: error("NAWAH_KEYSTORE_PATH is not set"))
+            storePassword = System.getenv("NAWAH_STORE_PASSWORD") ?: ""
+            keyAlias = "nawah-release"
+            keyPassword = System.getenv("NAWAH_KEY_PASSWORD") ?: ""
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             optimization {
                 enable = false
             }
@@ -63,3 +73,4 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:13.0.0")
 }
+

@@ -3,6 +3,7 @@ package com.aese11.arabiccourseplatform.ui.video
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.Log
+import android.webkit.WebView
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -51,6 +52,24 @@ private fun Context.findLifecycleOwner(): LifecycleOwner? {
         current = current.baseContext
     }
     return current as? LifecycleOwner
+}
+
+/**
+ * cc_load_policy=0 هو الوضع الافتراضي ومش بيقفل الترجمة، فنقفلها بنفسنا
+ * عن طريق unloadModule في الـ IFrame API (دالة غير موثقة رسمياً لكنها شائعة).
+ */
+private fun disableCaptions(playerView: ViewGroup) {
+    for (i in 0 until playerView.childCount) {
+        val web = playerView.getChildAt(i) as? WebView ?: continue
+        web.evaluateJavascript(
+            "try{" +
+                    "player.unloadModule('captions');" +
+                    "player.unloadModule('cc');" +
+                    "try{player.setOption('captions','track',{});}catch(e){}" +
+                    "'ok'" +
+                    "}catch(e){'err:'+e}"
+        ) { result -> Log.d(TAG, "disable captions -> $result") }
+    }
 }
 
 private class SpeedOption(val label: String, val rate: PlayerConstants.PlaybackRate)
@@ -151,6 +170,8 @@ fun YouTubeEmbeddedPlayer(
                                 enableAutomaticInitialization = false
                             }
 
+                            var lastCcCheck = -1
+
                             val listener = object : AbstractYouTubePlayerListener() {
                                 override fun onReady(youTubePlayer: YouTubePlayer) {
                                     Log.d(TAG, "ready")
@@ -163,6 +184,13 @@ fun YouTubeEmbeddedPlayer(
                                     state2: PlayerConstants.PlayerState
                                 ) {
                                     state = state2
+                                    if (state2 == PlayerConstants.PlayerState.PLAYING ||
+                                        state2 == PlayerConstants.PlayerState.VIDEO_CUED
+                                    ) {
+                                        // نقفل الترجمة، ونعيدها بعد ثانية لأنها ممكن تتحمل متأخرة
+                                        disableCaptions(playerView)
+                                        playerView.postDelayed({ disableCaptions(playerView) }, 1000)
+                                    }
                                     if (state2 == PlayerConstants.PlayerState.PLAYING) {
                                         hasStarted = true
                                         // يوتيوب ممكن يرجّع السرعة لـ 1x، فنعيد تطبيق السرعة المختارة
@@ -172,6 +200,12 @@ fun YouTubeEmbeddedPlayer(
 
                                 override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                                     current = second
+                                    // نعيد قفل الترجمة كل 3 ثواني أثناء التشغيل (بعض الأجهزة بتحملها متأخر)
+                                    val sec = second.toInt()
+                                    if (sec != lastCcCheck && sec % 3 == 0) {
+                                        lastCcCheck = sec
+                                        disableCaptions(playerView)
+                                    }
                                 }
 
                                 override fun onVideoDuration(youTubePlayer: YouTubePlayer, d: Float) {
@@ -193,7 +227,7 @@ fun YouTubeEmbeddedPlayer(
                                 .fullscreen(0)
                                 .rel(0)
                                 .ivLoadPolicy(3)
-                                .ccLoadPolicy(1)
+                                .ccLoadPolicy(0)
                                 .build()
 
                             playerView.initialize(listener, true, options)
